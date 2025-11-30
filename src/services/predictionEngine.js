@@ -241,25 +241,13 @@ export function generateBalanced(gameConfig, stats, options = {}) {
     const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
 
     let numbers = [...include];
-    const remaining = numbersPerDraw - numbers.length;
-
-    // Calculate current balance
-    const currentEven = numbers.filter(n => n % 2 === 0).length;
-    const currentOdd = numbers.length - currentEven;
     const midPoint = (minNumber + maxNumber) / 2;
-    const currentLow = numbers.filter(n => n <= midPoint).length;
-    const currentHigh = numbers.length - currentLow;
 
     // Target balanced distribution (close to 50/50)
     const targetEven = Math.round(numbersPerDraw / 2);
     const targetOdd = numbersPerDraw - targetEven;
     const targetLow = Math.round(numbersPerDraw / 2);
     const targetHigh = numbersPerDraw - targetLow;
-
-    const evenNeeded = Math.max(0, targetEven - currentEven);
-    const oddNeeded = Math.max(0, targetOdd - currentOdd);
-    const lowNeeded = Math.max(0, targetLow - currentLow);
-    const highNeeded = Math.max(0, targetHigh - currentHigh);
 
     // Create pools
     const evenLow = [], evenHigh = [], oddLow = [], oddHigh = [];
@@ -276,19 +264,51 @@ export function generateBalanced(gameConfig, stats, options = {}) {
         else oddHigh.push(i);
     }
 
-    // Fill based on needs
-    const addFromPool = (pool, count) => {
-        for (let i = 0; i < count && pool.length > 0; i++) {
-            const randomIndex = Math.floor(Math.random() * pool.length);
-            numbers.push(pool.splice(randomIndex, 1)[0]);
+    // Shuffle all pools
+    [evenLow, evenHigh, oddLow, oddHigh].forEach(pool => {
+        for (let i = pool.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [pool[i], pool[j]] = [pool[j], pool[i]];
         }
-    };
+    });
 
-    // Balance even/odd and low/high simultaneously
-    if (evenNeeded > 0 && lowNeeded > 0) addFromPool(evenLow, Math.min(evenNeeded, lowNeeded));
-    if (evenNeeded > 0 && highNeeded > 0) addFromPool(evenHigh, Math.min(evenNeeded, highNeeded));
-    if (oddNeeded > 0 && lowNeeded > 0) addFromPool(oddLow, Math.min(oddNeeded, lowNeeded));
-    if (oddNeeded > 0 && highNeeded > 0) addFromPool(oddHigh, Math.min(oddNeeded, highNeeded));
+    // Add numbers to achieve balance
+    while (numbers.length < numbersPerDraw) {
+        const currentEven = numbers.filter(n => n % 2 === 0).length;
+        const currentOdd = numbers.length - currentEven;
+        const currentLow = numbers.filter(n => n <= midPoint).length;
+        const currentHigh = numbers.length - currentLow;
+
+        const needsEven = currentEven < targetEven;
+        const needsOdd = currentOdd < targetOdd;
+        const needsLow = currentLow < targetLow;
+        const needsHigh = currentHigh < targetHigh;
+
+        // Select from appropriate pool
+        let selectedPool = null;
+        if (needsEven && needsLow && evenLow.length > 0) selectedPool = evenLow;
+        else if (needsEven && needsHigh && evenHigh.length > 0) selectedPool = evenHigh;
+        else if (needsOdd && needsLow && oddLow.length > 0) selectedPool = oddLow;
+        else if (needsOdd && needsHigh && oddHigh.length > 0) selectedPool = oddHigh;
+        else if (needsEven && evenLow.length > 0) selectedPool = evenLow;
+        else if (needsEven && evenHigh.length > 0) selectedPool = evenHigh;
+        else if (needsOdd && oddLow.length > 0) selectedPool = oddLow;
+        else if (needsOdd && oddHigh.length > 0) selectedPool = oddHigh;
+        else {
+            // Use any available pool
+            if (evenLow.length > 0) selectedPool = evenLow;
+            else if (evenHigh.length > 0) selectedPool = evenHigh;
+            else if (oddLow.length > 0) selectedPool = oddLow;
+            else if (oddHigh.length > 0) selectedPool = oddHigh;
+            else break; // No more numbers available
+        }
+
+        if (selectedPool && selectedPool.length > 0) {
+            numbers.push(selectedPool.shift());
+        } else {
+            break;
+        }
+    }
 
     fillRemainingSafe(numbers, numbersPerDraw, minNumber, maxNumber, exclude);
     return numbers.sort((a, b) => a - b);
