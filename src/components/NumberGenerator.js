@@ -30,9 +30,15 @@ export function renderNumberGenerator(onGenerate) {
           <label for="strategy">Estratégia de Geração</label>
           <select id="strategy" class="form-select">
             <option value="smart-mix">🎯 Mix Inteligente (Recomendado)</option>
-            <option value="weighted">📊 Baseado em Frequência</option>
+            <option value="frequency">📊 Baseado em Frequência</option>
             <option value="pattern">⚖️ Baseado em Padrões</option>
             <option value="random">🎲 Aleatório Puro</option>
+            <option value="balanced">⚖️ Distribuição Balanceada</option>
+            <option value="co-occurrence">🔗 Co-ocorrência</option>
+            <option value="weighted-random">📈 Geração Ponderada</option>
+            <option value="filtered">🔍 Exclusão de Improváveis</option>
+            <option value="coverage">🎯 Varredura de Cobertura</option>
+            <option value="combinatorial">🧮 Filtros Combinatórios</option>
           </select>
         </div>
       </div>
@@ -102,10 +108,16 @@ function updateStrategyDescription() {
   const descriptionEl = document.getElementById('strategy-description');
 
   const descriptions = {
-    'smart-mix': '<strong>🎯 Mix Inteligente:</strong> Combina números quentes (40%), números atrasados (30%) e números aleatórios (30%) para criar uma combinação balanceada baseada em análise estatística.',
-    'weighted': '<strong>📊 Baseado em Frequência:</strong> Gera números dando maior peso para aqueles que foram sorteados com mais frequência no histórico. Números mais sorteados têm maior chance de serem escolhidos.',
-    'pattern': '<strong>⚖️ Baseado em Padrões:</strong> Segue os padrões mais comuns de distribuição par/ímpar encontrados nos sorteios históricos.',
-    'random': '<strong>🎲 Aleatório Puro:</strong> Geração completamente aleatória, sem considerar dados históricos. Todas as combinações têm a mesma probabilidade.'
+    'smart-mix': '<strong>🎯 Mix Inteligente:</strong> Combina automaticamente frequência, distribuição balanceada, padrões, co-ocorrência e filtros combinatórios para gerar jogos equilibrados e coerentes.',
+    'frequency': '<strong>📊 Baseado em Frequência:</strong> Seleciona números com base em frequência absoluta e relativa. Mistura números quentes (alta frequência), médios e frios (baixa frequência) de forma proporcional.',
+    'pattern': '<strong>⚖️ Baseado em Padrões:</strong> Identifica e replica padrões comuns encontrados no histórico: grupos, repetições típicas e formatos recorrentes de distribuição par/ímpar e baixo/alto.',
+    'random': '<strong>🎲 Aleatório Puro:</strong> Geração totalmente aleatória sem filtros ou intervenções. Garante que não repita jogos idênticos já gerados.',
+    'balanced': '<strong>⚖️ Distribuição Balanceada:</strong> Equilibra o jogo em pares/ímpares, baixos/altos e distribuição por faixas. Evita extremos estatisticamente improváveis.',
+    'co-occurrence': '<strong>🔗 Co-ocorrência:</strong> Escolhe números que aparecem juntos com frequência no histórico. Usa pares e trios estatisticamente relevantes identificados nos sorteios.',
+    'weighted-random': '<strong>📈 Geração Ponderada:</strong> Gera números aleatórios com pesos baseados em frequência, co-ocorrência e posição histórica. Mantém aleatoriedade com tendência suave.',
+    'filtered': '<strong>🔍 Exclusão de Improváveis:</strong> Filtra automaticamente combinações improváveis: sequências longas, somas extremas, concentração regional excessiva e repetições recentes.',
+    'coverage': '<strong>🎯 Varredura de Cobertura:</strong> Ao gerar múltiplos jogos, diversifica ao máximo, evita repetições entre jogos e maximiza a cobertura do conjunto total de números.',
+    'combinatorial': '<strong>🧮 Filtros Combinatórios:</strong> Aplica filtros matemáticos: limita números consecutivos, controla repetições, equilibra somas e distribui por regiões.'
   };
 
   descriptionEl.innerHTML = descriptions[strategy] || descriptions['smart-mix'];

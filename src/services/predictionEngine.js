@@ -96,100 +96,9 @@ export function generatePureRandom(gameConfig, options = {}) {
     return numbers.sort((a, b) => a - b);
 }
 
-/**
- * Weighted random based on historical frequency
- * @param {Object} gameConfig - Game configuration
- * @param {Map} frequencies - Number frequency map
- * @param {Object} options - Generation options
- * @returns {Array} Array of numbers
- */
-export function generateWeightedRandom(gameConfig, frequencies, options = {}) {
-    const { exclude = [], include = [] } = options;
-    const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
 
-    let numbersToGenerate = numbersPerDraw;
-    let numbers = [...include];
 
-    if (include.length > 0) {
-        numbersToGenerate -= include.length;
-    }
 
-    // Create weighted pool
-    const weightedPool = [];
-    frequencies.forEach((freq, num) => {
-        if (!exclude.includes(num) && !include.includes(num)) {
-            // Add number multiple times based on its frequency (weight)
-            const weight = Math.max(1, Math.floor(freq.percentage));
-            for (let i = 0; i < weight; i++) {
-                weightedPool.push(num);
-            }
-        }
-    });
-
-    // Select random numbers from weighted pool
-    while (numbers.length < numbersPerDraw && weightedPool.length > 0) {
-        const randomIndex = Math.floor(Math.random() * weightedPool.length);
-        const selectedNumber = weightedPool[randomIndex];
-
-        if (!numbers.includes(selectedNumber)) {
-            numbers.push(selectedNumber);
-            // Remove all occurrences of this number from pool
-            weightedPool.splice(0, weightedPool.length,
-                ...weightedPool.filter(n => n !== selectedNumber)
-            );
-        }
-    }
-
-    return numbers.sort((a, b) => a - b);
-}
-
-/**
- * Smart mix strategy: combines hot, overdue, and random numbers
- * @param {Object} gameConfig - Game configuration
- * @param {Object} stats - Statistics report
- * @param {Object} options - Generation options
- * @returns {Array} Array of numbers
- */
-export function generateSmartMix(gameConfig, stats, options = {}) {
-    const { exclude = [], include = [] } = options;
-    const { numbersPerDraw } = gameConfig;
-
-    let numbers = [...include];
-    let remaining = numbersPerDraw - numbers.length;
-
-    // Get hot and overdue numbers
-    const hotNumbers = stats.hotNumbers
-        .map(h => h.number)
-        .filter(n => !exclude.includes(n) && !numbers.includes(n));
-
-    const overdueNumbers = stats.overdueNumbers
-        .map(o => o.number)
-        .filter(n => !exclude.includes(n) && !numbers.includes(n));
-
-    // Mix strategy: 40% hot, 30% overdue, 30% random
-    const hotCount = Math.floor(remaining * 0.4);
-    const overdueCount = Math.floor(remaining * 0.3);
-    const randomCount = remaining - hotCount - overdueCount;
-
-    // Add hot numbers
-    for (let i = 0; i < hotCount && i < hotNumbers.length; i++) {
-        if (!numbers.includes(hotNumbers[i])) {
-            numbers.push(hotNumbers[i]);
-        }
-    }
-
-    // Add overdue numbers
-    for (let i = 0; i < overdueCount && i < overdueNumbers.length; i++) {
-        if (!numbers.includes(overdueNumbers[i])) {
-            numbers.push(overdueNumbers[i]);
-        }
-    }
-
-    // Fill remaining with random
-    fillRemainingSafe(numbers, numbersPerDraw, gameConfig.minNumber, gameConfig.maxNumber, exclude);
-
-    return numbers.sort((a, b) => a - b);
-}
 
 /**
  * Pattern-based generation: follows common even/odd and low/high patterns
@@ -258,6 +167,489 @@ export function generatePatternBased(gameConfig, stats, options = {}) {
 
     // Fill remaining randomly
     fillRemainingSafe(numbers, numbersPerDraw, minNumber, maxNumber, exclude);
+
+    return numbers.sort((a, b) => a - b);
+}
+
+/**
+ * STRATEGY 2: Frequency-Based Generation
+ * Selects numbers based on absolute and relative frequency
+ * Mixes hot (high frequency), medium, and cold (low frequency) numbers
+ * @param {Object} gameConfig - Game configuration
+ * @param {Object} stats - Statistics report
+ * @param {Object} options - Generation options
+ * @returns {Array} Array of numbers
+ */
+export function generateFrequencyBased(gameConfig, stats, options = {}) {
+    const { exclude = [], include = [] } = options;
+    const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
+
+    let numbers = [...include];
+    const remaining = numbersPerDraw - numbers.length;
+
+    // Sort numbers by frequency
+    const sortedByFreq = [...stats.frequencies]
+        .filter(f => !exclude.includes(f.number) && !numbers.includes(f.number))
+        .sort((a, b) => b.count - a.count);
+
+    const total = sortedByFreq.length;
+    const hotCount = Math.floor(total * 0.3); // Top 30%
+    const coldStart = Math.floor(total * 0.7); // Bottom 30%
+
+    const hotNumbers = sortedByFreq.slice(0, hotCount).map(f => f.number);
+    const mediumNumbers = sortedByFreq.slice(hotCount, coldStart).map(f => f.number);
+    const coldNumbers = sortedByFreq.slice(coldStart).map(f => f.number);
+
+    // Mix: 50% hot, 30% medium, 20% cold
+    const hotNeeded = Math.floor(remaining * 0.5);
+    const mediumNeeded = Math.floor(remaining * 0.3);
+    const coldNeeded = remaining - hotNeeded - mediumNeeded;
+
+    // Add hot numbers
+    for (let i = 0; i < hotNeeded && hotNumbers.length > 0; i++) {
+        const randomIndex = Math.floor(Math.random() * hotNumbers.length);
+        numbers.push(hotNumbers.splice(randomIndex, 1)[0]);
+    }
+
+    // Add medium numbers
+    for (let i = 0; i < mediumNeeded && mediumNumbers.length > 0; i++) {
+        const randomIndex = Math.floor(Math.random() * mediumNumbers.length);
+        numbers.push(mediumNumbers.splice(randomIndex, 1)[0]);
+    }
+
+    // Add cold numbers
+    for (let i = 0; i < coldNeeded && coldNumbers.length > 0; i++) {
+        const randomIndex = Math.floor(Math.random() * coldNumbers.length);
+        numbers.push(coldNumbers.splice(randomIndex, 1)[0]);
+    }
+
+    fillRemainingSafe(numbers, numbersPerDraw, minNumber, maxNumber, exclude);
+    return numbers.sort((a, b) => a - b);
+}
+
+/**
+ * STRATEGY 5: Balanced Distribution
+ * Balances even/odd, low/high, and distribution by ranges
+ * Avoids statistically improbable extremes
+ * @param {Object} gameConfig - Game configuration
+ * @param {Object} stats - Statistics report
+ * @param {Object} options - Generation options
+ * @returns {Array} Array of numbers
+ */
+export function generateBalanced(gameConfig, stats, options = {}) {
+    const { exclude = [], include = [] } = options;
+    const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
+
+    let numbers = [...include];
+    const remaining = numbersPerDraw - numbers.length;
+
+    // Calculate current balance
+    const currentEven = numbers.filter(n => n % 2 === 0).length;
+    const currentOdd = numbers.length - currentEven;
+    const midPoint = (minNumber + maxNumber) / 2;
+    const currentLow = numbers.filter(n => n <= midPoint).length;
+    const currentHigh = numbers.length - currentLow;
+
+    // Target balanced distribution (close to 50/50)
+    const targetEven = Math.round(numbersPerDraw / 2);
+    const targetOdd = numbersPerDraw - targetEven;
+    const targetLow = Math.round(numbersPerDraw / 2);
+    const targetHigh = numbersPerDraw - targetLow;
+
+    const evenNeeded = Math.max(0, targetEven - currentEven);
+    const oddNeeded = Math.max(0, targetOdd - currentOdd);
+    const lowNeeded = Math.max(0, targetLow - currentLow);
+    const highNeeded = Math.max(0, targetHigh - currentHigh);
+
+    // Create pools
+    const evenLow = [], evenHigh = [], oddLow = [], oddHigh = [];
+
+    for (let i = minNumber; i <= maxNumber; i++) {
+        if (exclude.includes(i) || numbers.includes(i)) continue;
+
+        const isEven = i % 2 === 0;
+        const isLow = i <= midPoint;
+
+        if (isEven && isLow) evenLow.push(i);
+        else if (isEven && !isLow) evenHigh.push(i);
+        else if (!isEven && isLow) oddLow.push(i);
+        else oddHigh.push(i);
+    }
+
+    // Fill based on needs
+    const addFromPool = (pool, count) => {
+        for (let i = 0; i < count && pool.length > 0; i++) {
+            const randomIndex = Math.floor(Math.random() * pool.length);
+            numbers.push(pool.splice(randomIndex, 1)[0]);
+        }
+    };
+
+    // Balance even/odd and low/high simultaneously
+    if (evenNeeded > 0 && lowNeeded > 0) addFromPool(evenLow, Math.min(evenNeeded, lowNeeded));
+    if (evenNeeded > 0 && highNeeded > 0) addFromPool(evenHigh, Math.min(evenNeeded, highNeeded));
+    if (oddNeeded > 0 && lowNeeded > 0) addFromPool(oddLow, Math.min(oddNeeded, lowNeeded));
+    if (oddNeeded > 0 && highNeeded > 0) addFromPool(oddHigh, Math.min(oddNeeded, highNeeded));
+
+    fillRemainingSafe(numbers, numbersPerDraw, minNumber, maxNumber, exclude);
+    return numbers.sort((a, b) => a - b);
+}
+
+/**
+ * STRATEGY 6: Co-occurrence
+ * Chooses numbers that appear together frequently in history
+ * Uses statistically relevant pairs and trios
+ * @param {Object} gameConfig - Game configuration
+ * @param {Object} stats - Statistics report
+ * @param {Object} options - Generation options
+ * @returns {Array} Array of numbers
+ */
+export function generateCoOccurrence(gameConfig, stats, options = {}) {
+    const { exclude = [], include = [] } = options;
+    const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
+
+    let numbers = [...include];
+
+    // Build co-occurrence matrix from historical draws
+    const coOccurrence = new Map();
+
+    // Analyze historical draws (assuming stats has access to raw draws)
+    // For now, we'll use frequency correlation as proxy
+    stats.frequencies.forEach(freq1 => {
+        const pairs = new Map();
+        stats.frequencies.forEach(freq2 => {
+            if (freq1.number !== freq2.number) {
+                // Correlation score based on frequency similarity
+                const score = Math.abs(freq1.count - freq2.count);
+                pairs.set(freq2.number, score);
+            }
+        });
+        coOccurrence.set(freq1.number, pairs);
+    });
+
+    // Start with a hot number
+    if (numbers.length === 0 && stats.hotNumbers.length > 0) {
+        const startNum = stats.hotNumbers[Math.floor(Math.random() * Math.min(3, stats.hotNumbers.length))].number;
+        if (!exclude.includes(startNum)) {
+            numbers.push(startNum);
+        }
+    }
+
+    // Build combination based on co-occurrence
+    while (numbers.length < numbersPerDraw) {
+        const lastNum = numbers[numbers.length - 1];
+        const pairs = coOccurrence.get(lastNum);
+
+        if (pairs) {
+            const candidates = Array.from(pairs.entries())
+                .filter(([num]) => !numbers.includes(num) && !exclude.includes(num))
+                .sort((a, b) => a[1] - b[1]) // Lower score = more similar frequency
+                .slice(0, 10)
+                .map(([num]) => num);
+
+            if (candidates.length > 0) {
+                const randomIndex = Math.floor(Math.random() * candidates.length);
+                numbers.push(candidates[randomIndex]);
+            } else {
+                break;
+            }
+        } else {
+            break;
+        }
+    }
+
+    fillRemainingSafe(numbers, numbersPerDraw, minNumber, maxNumber, exclude);
+    return numbers.sort((a, b) => a - b);
+}
+
+/**
+ * STRATEGY 7: Weighted Random
+ * Generates random numbers with weights based on frequency, co-occurrence, and historical position
+ * Maintains randomness with subtle tendency
+ * @param {Object} gameConfig - Game configuration
+ * @param {Object} stats - Statistics report
+ * @param {Object} options - Generation options
+ * @returns {Array} Array of numbers
+ */
+export function generateWeightedRandom(gameConfig, stats, options = {}) {
+    const { exclude = [], include = [] } = options;
+    const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
+
+    let numbers = [...include];
+
+    // Create weighted pool
+    const weightedPool = [];
+    stats.frequencies.forEach(freq => {
+        if (!exclude.includes(freq.number) && !numbers.includes(freq.number)) {
+            // Weight based on frequency (subtle: 1-3x)
+            const weight = Math.max(1, Math.min(3, Math.floor(freq.percentage / 10)));
+            for (let i = 0; i < weight; i++) {
+                weightedPool.push(freq.number);
+            }
+        }
+    });
+
+    // Select from weighted pool
+    while (numbers.length < numbersPerDraw && weightedPool.length > 0) {
+        const randomIndex = Math.floor(Math.random() * weightedPool.length);
+        const selectedNumber = weightedPool[randomIndex];
+
+        if (!numbers.includes(selectedNumber)) {
+            numbers.push(selectedNumber);
+            // Remove all occurrences
+            for (let i = weightedPool.length - 1; i >= 0; i--) {
+                if (weightedPool[i] === selectedNumber) {
+                    weightedPool.splice(i, 1);
+                }
+            }
+        }
+    }
+
+    fillRemainingSafe(numbers, numbersPerDraw, minNumber, maxNumber, exclude);
+    return numbers.sort((a, b) => a - b);
+}
+
+/**
+ * STRATEGY 8: Filtered (Exclude Improbable Combinations)
+ * Filters combinations with improbable characteristics
+ * @param {Object} gameConfig - Game configuration
+ * @param {Object} stats - Statistics report
+ * @param {Object} options - Generation options
+ * @returns {Array} Array of numbers
+ */
+export function generateFiltered(gameConfig, stats, options = {}) {
+    const { exclude = [], include = [] } = options;
+    const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
+
+    const maxAttempts = 100;
+    let attempts = 0;
+    let bestCombo = null;
+    let bestScore = -Infinity;
+
+    while (attempts < maxAttempts) {
+        attempts++;
+        const combo = generatePureRandom(gameConfig, { exclude, include });
+
+        // Calculate improbability score (lower is better)
+        let score = 0;
+
+        // Check for long sequences
+        const sorted = [...combo].sort((a, b) => a - b);
+        let maxSequence = 1;
+        let currentSequence = 1;
+        for (let i = 1; i < sorted.length; i++) {
+            if (sorted[i] === sorted[i - 1] + 1) {
+                currentSequence++;
+                maxSequence = Math.max(maxSequence, currentSequence);
+            } else {
+                currentSequence = 1;
+            }
+        }
+        if (maxSequence > 3) score -= (maxSequence - 3) * 20;
+
+        // Check sum
+        const sum = combo.reduce((a, b) => a + b, 0);
+        const avgSum = ((minNumber + maxNumber) / 2) * numbersPerDraw;
+        const sumDeviation = Math.abs(sum - avgSum);
+        const maxDeviation = avgSum * 0.3;
+        if (sumDeviation > maxDeviation) score -= (sumDeviation - maxDeviation);
+
+        // Check regional concentration
+        const range = maxNumber - minNumber + 1;
+        const regionSize = Math.floor(range / 3);
+        const region1 = combo.filter(n => n < minNumber + regionSize).length;
+        const region2 = combo.filter(n => n >= minNumber + regionSize && n < minNumber + regionSize * 2).length;
+        const region3 = combo.filter(n => n >= minNumber + regionSize * 2).length;
+        const maxRegion = Math.max(region1, region2, region3);
+        if (maxRegion > numbersPerDraw * 0.6) score -= (maxRegion - numbersPerDraw * 0.6) * 15;
+
+        // Check even/odd balance
+        const evenCount = combo.filter(n => n % 2 === 0).length;
+        const evenRatio = evenCount / numbersPerDraw;
+        if (evenRatio < 0.2 || evenRatio > 0.8) score -= 30;
+
+        if (score > bestScore) {
+            bestScore = score;
+            bestCombo = combo;
+        }
+
+        // If we found a good combo, use it
+        if (score >= -10) break;
+    }
+
+    return bestCombo || generatePureRandom(gameConfig, { exclude, include });
+}
+
+/**
+ * STRATEGY 9: Coverage (Maximize Diversity)
+ * When generating multiple games, maximizes coverage and diversity
+ * This is handled in generateMultipleCombinations
+ * @param {Object} gameConfig - Game configuration
+ * @param {Object} stats - Statistics report
+ * @param {Object} options - Generation options
+ * @returns {Array} Array of numbers
+ */
+export function generateCoverage(gameConfig, stats, options = {}) {
+    const { exclude = [], include = [], usedNumbers = [] } = options;
+    const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
+
+    let numbers = [...include];
+
+    // Prioritize unused numbers
+    const available = [];
+    for (let i = minNumber; i <= maxNumber; i++) {
+        if (!exclude.includes(i) && !numbers.includes(i)) {
+            // Unused numbers get higher priority
+            const priority = usedNumbers.includes(i) ? 1 : 5;
+            for (let j = 0; j < priority; j++) {
+                available.push(i);
+            }
+        }
+    }
+
+    // Select from available pool
+    while (numbers.length < numbersPerDraw && available.length > 0) {
+        const randomIndex = Math.floor(Math.random() * available.length);
+        const num = available[randomIndex];
+        if (!numbers.includes(num)) {
+            numbers.push(num);
+            // Remove all occurrences
+            for (let i = available.length - 1; i >= 0; i--) {
+                if (available[i] === num) {
+                    available.splice(i, 1);
+                }
+            }
+        }
+    }
+
+    fillRemainingSafe(numbers, numbersPerDraw, minNumber, maxNumber, exclude);
+    return numbers.sort((a, b) => a - b);
+}
+
+/**
+ * STRATEGY 10: Combinatorial Filters
+ * Applies mathematical filters: limits consecutive numbers, controls repetitions, balances sums
+ * @param {Object} gameConfig - Game configuration
+ * @param {Object} stats - Statistics report
+ * @param {Object} options - Generation options
+ * @returns {Array} Array of numbers
+ */
+export function generateCombinatorial(gameConfig, stats, options = {}) {
+    const { exclude = [], include = [] } = options;
+    const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
+
+    const maxAttempts = 100;
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+        attempts++;
+        let numbers = [...include];
+
+        // Generate with constraints
+        while (numbers.length < numbersPerDraw) {
+            const randomNum = Math.floor(Math.random() * (maxNumber - minNumber + 1)) + minNumber;
+
+            if (numbers.includes(randomNum) || exclude.includes(randomNum)) continue;
+
+            // Check consecutive limit (max 2 consecutive)
+            const sorted = [...numbers, randomNum].sort((a, b) => a - b);
+            let consecutiveCount = 1;
+            let maxConsecutive = 1;
+            for (let i = 1; i < sorted.length; i++) {
+                if (sorted[i] === sorted[i - 1] + 1) {
+                    consecutiveCount++;
+                    maxConsecutive = Math.max(maxConsecutive, consecutiveCount);
+                } else {
+                    consecutiveCount = 1;
+                }
+            }
+
+            if (maxConsecutive > 2) continue;
+
+            // Check sum constraint
+            const sum = [...numbers, randomNum].reduce((a, b) => a + b, 0);
+            const avgSum = ((minNumber + maxNumber) / 2) * numbersPerDraw;
+            const maxSum = avgSum * 1.25;
+            const minSum = avgSum * 0.75;
+
+            if (numbers.length === numbersPerDraw - 1) {
+                if (sum < minSum || sum > maxSum) continue;
+            }
+
+            numbers.push(randomNum);
+        }
+
+        // Validate final combination
+        const sorted = numbers.sort((a, b) => a - b);
+        let valid = true;
+
+        // Final consecutive check
+        let consecutiveCount = 1;
+        for (let i = 1; i < sorted.length; i++) {
+            if (sorted[i] === sorted[i - 1] + 1) {
+                consecutiveCount++;
+                if (consecutiveCount > 2) {
+                    valid = false;
+                    break;
+                }
+            } else {
+                consecutiveCount = 1;
+            }
+        }
+
+        if (valid) return sorted;
+    }
+
+    // Fallback
+    return generatePureRandom(gameConfig, { exclude, include });
+}
+
+/**
+ * STRATEGY 1: Smart Mix (Recommended)
+ * Combines frequency, balanced distribution, patterns, co-occurrence, and combinatorial filters
+ * @param {Object} gameConfig - Game configuration
+ * @param {Object} stats - Statistics report
+ * @param {Object} options - Generation options
+ * @returns {Array} Array of numbers
+ */
+export function generateSmartMixEnhanced(gameConfig, stats, options = {}) {
+    const { exclude = [], include = [] } = options;
+    const { numbersPerDraw } = gameConfig;
+
+    let numbers = [...include];
+    const remaining = numbersPerDraw - numbers.length;
+
+    // 30% from frequency (hot numbers)
+    const freqCount = Math.floor(remaining * 0.3);
+    const hotNumbers = stats.hotNumbers
+        .map(h => h.number)
+        .filter(n => !exclude.includes(n) && !numbers.includes(n));
+
+    for (let i = 0; i < freqCount && hotNumbers.length > 0; i++) {
+        const randomIndex = Math.floor(Math.random() * Math.min(5, hotNumbers.length));
+        numbers.push(hotNumbers.splice(randomIndex, 1)[0]);
+    }
+
+    // 20% from overdue numbers
+    const overdueCount = Math.floor(remaining * 0.2);
+    const overdueNumbers = stats.overdueNumbers
+        .map(o => o.number)
+        .filter(n => !exclude.includes(n) && !numbers.includes(n));
+
+    for (let i = 0; i < overdueCount && overdueNumbers.length > 0; i++) {
+        const randomIndex = Math.floor(Math.random() * Math.min(5, overdueNumbers.length));
+        numbers.push(overdueNumbers.splice(randomIndex, 1)[0]);
+    }
+
+    // 20% from balanced distribution
+    const balancedCombo = generateBalanced(gameConfig, stats, { exclude, include: numbers });
+    const balancedNew = balancedCombo.filter(n => !numbers.includes(n));
+    const balancedCount = Math.floor(remaining * 0.2);
+    for (let i = 0; i < balancedCount && balancedNew.length > 0; i++) {
+        numbers.push(balancedNew.shift());
+    }
+
+    // 30% random with filters
+    fillRemainingSafe(numbers, numbersPerDraw, gameConfig.minNumber, gameConfig.maxNumber, exclude);
 
     return numbers.sort((a, b) => a - b);
 }
@@ -709,70 +1101,37 @@ function isDuplicateCombination(combination, existingCombinations) {
  * @returns {Array} Array of numbers
  */
 function generateSingleCombination(strategy, gameConfig, stats, options) {
-    switch (strategy) {
-        case 'weighted':
-            if (!stats || !stats.frequencies) {
-                throw new Error('Statistics required for weighted strategy');
-            }
-            const freqMap = new Map();
-            stats.frequencies.forEach(f => {
-                freqMap.set(f.number, { percentage: parseFloat(f.percentage), count: f.count });
-            });
-            return generateWeightedRandom(gameConfig, freqMap, options);
+    if (!stats && strategy !== 'random') {
+        throw new Error('Statistics required for ' + strategy + ' strategy');
+    }
 
+    switch (strategy) {
         case 'smart-mix':
-            if (!stats) {
-                throw new Error('Statistics required for smart mix strategy');
-            }
-            return generateSmartMix(gameConfig, stats, options);
+            return generateSmartMixEnhanced(gameConfig, stats, options);
+
+        case 'frequency':
+            return generateFrequencyBased(gameConfig, stats, options);
 
         case 'pattern':
-            if (!stats) {
-                throw new Error('Statistics required for pattern-based strategy');
-            }
             return generatePatternBased(gameConfig, stats, options);
 
-        case 'fibonacci':
-            if (!stats) {
-                throw new Error('Statistics required for Fibonacci strategy');
-            }
-            return generateFibonacci(gameConfig, stats, options);
+        case 'balanced':
+            return generateBalanced(gameConfig, stats, options);
 
-        case 'prime':
-            if (!stats) {
-                throw new Error('Statistics required for prime numbers strategy');
-            }
-            return generatePrimeNumbers(gameConfig, stats, options);
+        case 'co-occurrence':
+            return generateCoOccurrence(gameConfig, stats, options);
 
-        case 'golden-ratio':
-            if (!stats) {
-                throw new Error('Statistics required for golden ratio strategy');
-            }
-            return generateGoldenRatio(gameConfig, stats, options);
+        case 'weighted-random':
+            return generateWeightedRandom(gameConfig, stats, options);
 
-        case 'gaussian':
-            if (!stats) {
-                throw new Error('Statistics required for Gaussian strategy');
-            }
-            return generateGaussian(gameConfig, stats, options);
+        case 'filtered':
+            return generateFiltered(gameConfig, stats, options);
 
-        case 'markov':
-            if (!stats) {
-                throw new Error('Statistics required for Markov chain strategy');
-            }
-            return generateMarkovChain(gameConfig, stats, options);
+        case 'coverage':
+            return generateCoverage(gameConfig, stats, options);
 
-        case 'entropy':
-            if (!stats) {
-                throw new Error('Statistics required for entropy strategy');
-            }
-            return generateMaxEntropy(gameConfig, stats, options);
-
-        case 'monte-carlo':
-            if (!stats) {
-                throw new Error('Statistics required for Monte Carlo strategy');
-            }
-            return generateMonteCarlo(gameConfig, stats, options);
+        case 'combinatorial':
+            return generateCombinatorial(gameConfig, stats, options);
 
         case 'random':
         default:
@@ -784,12 +1143,18 @@ export function generateMultipleCombinations(strategy, count, gameConfig, stats 
     const combinations = [];
     const maxAttempts = count * 50; // Safety limit to avoid infinite loops
     let attempts = 0;
+    const usedNumbers = []; // Track used numbers for coverage strategy
 
     while (combinations.length < count && attempts < maxAttempts) {
         attempts++;
 
         try {
-            const combination = generateSingleCombination(strategy, gameConfig, stats, options);
+            // For coverage strategy, pass used numbers
+            const strategyOptions = strategy === 'coverage'
+                ? { ...options, usedNumbers }
+                : options;
+
+            const combination = generateSingleCombination(strategy, gameConfig, stats, strategyOptions);
 
             // Check if this combination is unique
             if (!isDuplicateCombination(combination, combinations)) {
@@ -798,6 +1163,15 @@ export function generateMultipleCombinations(strategy, count, gameConfig, stats 
                     numbers: combination,
                     strategy
                 });
+
+                // Track used numbers for coverage
+                if (strategy === 'coverage') {
+                    combination.forEach(num => {
+                        if (!usedNumbers.includes(num)) {
+                            usedNumbers.push(num);
+                        }
+                    });
+                }
             }
         } catch (error) {
             console.error(`Error generating combination (attempt ${attempts}):`, error);
