@@ -8,10 +8,10 @@
  * @param {Function} onGenerate - Callback when generate button is clicked
  */
 export function renderNumberGenerator(onGenerate) {
-    const container = document.getElementById('number-generator');
-    if (!container) return;
+  const container = document.getElementById('number-generator');
+  if (!container) return;
 
-    container.innerHTML = `
+  container.innerHTML = `
     <div class="generator-form">
       <div class="form-row">
         <div class="form-group">
@@ -52,74 +52,74 @@ export function renderNumberGenerator(onGenerate) {
     </div>
   `;
 
-    // Add styles
-    addGeneratorStyles();
+  // Add styles
+  addGeneratorStyles();
 
-    // Add event listeners
-    const generateBtn = document.getElementById('generate-btn');
-    const strategySelect = document.getElementById('strategy');
-    const gameCountInput = document.getElementById('game-count');
+  // Add event listeners
+  const generateBtn = document.getElementById('generate-btn');
+  const strategySelect = document.getElementById('strategy');
+  const gameCountInput = document.getElementById('game-count');
 
-    // Update strategy description
-    strategySelect.addEventListener('change', updateStrategyDescription);
+  // Update strategy description
+  strategySelect.addEventListener('change', updateStrategyDescription);
 
-    // Generate button click
-    generateBtn.addEventListener('click', () => {
-        const count = parseInt(gameCountInput.value);
-        const strategy = strategySelect.value;
+  // Generate button click
+  generateBtn.addEventListener('click', () => {
+    const count = parseInt(gameCountInput.value);
+    const strategy = strategySelect.value;
 
-        if (count < 1 || count > 100) {
-            alert('Por favor, escolha entre 1 e 100 jogos.');
-            return;
-        }
+    if (count < 1 || count > 100) {
+      alert('Por favor, escolha entre 1 e 100 jogos.');
+      return;
+    }
 
-        // Show loading state
-        generateBtn.disabled = true;
-        generateBtn.innerHTML = `
+    // Show loading state
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = `
       <span class="spinner-small"></span>
       <span>Gerando...</span>
     `;
 
-        // Call callback with slight delay for UX
-        setTimeout(() => {
-            onGenerate(strategy, count);
+    // Call callback with slight delay for UX
+    setTimeout(() => {
+      onGenerate(strategy, count);
 
-            // Reset button
-            generateBtn.disabled = false;
-            generateBtn.innerHTML = `
+      // Reset button
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = `
         <span class="btn-icon">✨</span>
         <span>Gerar Números</span>
       `;
-        }, 300);
-    });
+    }, 300);
+  });
 }
 
 /**
  * Update strategy description based on selection
  */
 function updateStrategyDescription() {
-    const strategy = document.getElementById('strategy').value;
-    const descriptionEl = document.getElementById('strategy-description');
+  const strategy = document.getElementById('strategy').value;
+  const descriptionEl = document.getElementById('strategy-description');
 
-    const descriptions = {
-        'smart-mix': '<strong>🎯 Mix Inteligente:</strong> Combina números quentes (40%), números atrasados (30%) e números aleatórios (30%) para criar uma combinação balanceada baseada em análise estatística.',
-        'weighted': '<strong>📊 Baseado em Frequência:</strong> Gera números dando maior peso para aqueles que foram sorteados com mais frequência no histórico. Números mais sorteados têm maior chance de serem escolhidos.',
-        'pattern': '<strong>⚖️ Baseado em Padrões:</strong> Segue os padrões mais comuns de distribuição par/ímpar encontrados nos sorteios históricos.',
-        'random': '<strong>🎲 Aleatório Puro:</strong> Geração completamente aleatória, sem considerar dados históricos. Todas as combinações têm a mesma probabilidade.'
-    };
+  const descriptions = {
+    'smart-mix': '<strong>🎯 Mix Inteligente:</strong> Combina números quentes (40%), números atrasados (30%) e números aleatórios (30%) para criar uma combinação balanceada baseada em análise estatística.',
+    'weighted': '<strong>📊 Baseado em Frequência:</strong> Gera números dando maior peso para aqueles que foram sorteados com mais frequência no histórico. Números mais sorteados têm maior chance de serem escolhidos.',
+    'pattern': '<strong>⚖️ Baseado em Padrões:</strong> Segue os padrões mais comuns de distribuição par/ímpar encontrados nos sorteios históricos.',
+    'random': '<strong>🎲 Aleatório Puro:</strong> Geração completamente aleatória, sem considerar dados históricos. Todas as combinações têm a mesma probabilidade.'
+  };
 
-    descriptionEl.innerHTML = descriptions[strategy] || descriptions['smart-mix'];
+  descriptionEl.innerHTML = descriptions[strategy] || descriptions['smart-mix'];
 }
 
 /**
  * Add component styles
  */
 function addGeneratorStyles() {
-    if (document.getElementById('generator-styles')) return;
+  if (document.getElementById('generator-styles')) return;
 
-    const style = document.createElement('style');
-    style.id = 'generator-styles';
-    style.textContent = `
+  const style = document.createElement('style');
+  style.id = 'generator-styles';
+  style.textContent = `
     .generator-form {
       display: flex;
       flex-direction: column;
@@ -241,5 +241,5 @@ function addGeneratorStyles() {
     }
   `;
 
-    document.head.appendChild(style);
+  document.head.appendChild(style);
 }
