@@ -1159,6 +1159,94 @@ function generateSingleCombination(strategy, gameConfig, stats, options) {
     }
 }
 
+/**
+ * Generate explanation for a combination based on strategy
+ * @param {Array} numbers - Generated numbers
+ * @param {string} strategy - Strategy used
+ * @param {Object} gameConfig - Game configuration
+ * @param {Object} stats - Statistics report
+ * @returns {string} Explanation text
+ */
+function generateExplanation(numbers, strategy, gameConfig, stats) {
+    const { minNumber, maxNumber, numbersPerDraw } = gameConfig;
+    const sorted = [...numbers].sort((a, b) => a - b);
+
+    // Calculate statistics
+    const evenCount = numbers.filter(n => n % 2 === 0).length;
+    const oddCount = numbers.length - evenCount;
+    const midPoint = (minNumber + maxNumber) / 2;
+    const lowCount = numbers.filter(n => n <= midPoint).length;
+    const highCount = numbers.length - lowCount;
+    const sum = numbers.reduce((a, b) => a + b, 0);
+    const avgSum = ((minNumber + maxNumber) / 2) * numbersPerDraw;
+
+    // Check for consecutive numbers
+    let consecutiveGroups = [];
+    let currentGroup = [sorted[0]];
+    for (let i = 1; i < sorted.length; i++) {
+        if (sorted[i] === sorted[i - 1] + 1) {
+            currentGroup.push(sorted[i]);
+        } else {
+            if (currentGroup.length > 1) consecutiveGroups.push([...currentGroup]);
+            currentGroup = [sorted[i]];
+        }
+    }
+    if (currentGroup.length > 1) consecutiveGroups.push(currentGroup);
+
+    // Identify hot and cold numbers
+    const hotNumbers = stats.hotNumbers.slice(0, 10).map(h => h.number);
+    const coldNumbers = stats.overdueNumbers.slice(0, 10).map(o => o.number);
+    const hotInCombo = numbers.filter(n => hotNumbers.includes(n));
+    const coldInCombo = numbers.filter(n => coldNumbers.includes(n));
+
+    let explanation = '';
+
+    switch (strategy) {
+        case 'smart-mix':
+            explanation = `<strong>Mix Inteligente:</strong> Combinação equilibrada com ${hotInCombo.length} números quentes (${hotInCombo.join(', ') || 'nenhum'}), ${coldInCombo.length} números atrasados (${coldInCombo.join(', ') || 'nenhum'}). Distribuição: ${evenCount} pares e ${oddCount} ímpares, ${lowCount} baixos e ${highCount} altos. Soma total: ${sum} (média histórica: ${Math.round(avgSum)}).`;
+            break;
+
+        case 'frequency':
+            explanation = `<strong>Baseado em Frequência:</strong> ${hotInCombo.length} números quentes (${hotInCombo.join(', ') || 'nenhum'}), ${numbers.length - hotInCombo.length - coldInCombo.length} médios, ${coldInCombo.length} frios (${coldInCombo.join(', ') || 'nenhum'}). Equilíbrio: ${evenCount}E/${oddCount}O, ${lowCount}B/${highCount}A.`;
+            break;
+
+        case 'pattern':
+            explanation = `<strong>Baseado em Padrões:</strong> Padrão ${evenCount}E-${oddCount}O comum nos sorteios. ${consecutiveGroups.length > 0 ? `Consecutivos: ${consecutiveGroups.map(g => g.join('-')).join(', ')}. ` : ''}Distribuição baixo/alto: ${lowCount}/${highCount}.`;
+            break;
+
+        case 'balanced':
+            explanation = `<strong>Distribuição Balanceada:</strong> ${evenCount} pares e ${oddCount} ímpares (ideal: ${Math.round(numbersPerDraw / 2)}/${Math.round(numbersPerDraw / 2)}). ${lowCount} baixos (1-${Math.round(midPoint)}) e ${highCount} altos (${Math.round(midPoint) + 1}-${maxNumber}). Soma ${sum} ${sum > avgSum ? 'acima' : 'abaixo'} da média (${Math.round(avgSum)}).`;
+            break;
+
+        case 'co-occurrence':
+            explanation = `<strong>Co-ocorrência:</strong> Números com correlação estatística. Iniciando com ${sorted[0]}, ${hotInCombo.length} números quentes incluídos. Distribuição: ${evenCount}E/${oddCount}O, soma ${sum}.`;
+            break;
+
+        case 'weighted-random':
+            explanation = `<strong>Geração Ponderada:</strong> ${hotInCombo.length} números quentes, ${numbers.length - hotInCombo.length - coldInCombo.length} médios, ${coldInCombo.length} frios. Aleatoriedade com viés sutil. Soma: ${sum}.`;
+            break;
+
+        case 'filtered':
+            explanation = `<strong>Exclusão de Improváveis:</strong> ${consecutiveGroups.length === 0 ? 'Sem sequências longas.' : `Consecutivos: ${consecutiveGroups.map(g => g.join('-')).join(', ')}.`} Soma ${sum} na faixa (${Math.round(avgSum * 0.75)}-${Math.round(avgSum * 1.25)}). ${evenCount}E/${oddCount}O.`;
+            break;
+
+        case 'coverage':
+            explanation = `<strong>Varredura de Cobertura:</strong> Maximiza diversidade, prioriza números menos usados. Distribuição: ${evenCount} pares, ${oddCount} ímpares, ${lowCount} baixos, ${highCount} altos. Soma: ${sum}.`;
+            break;
+
+        case 'combinatorial':
+            explanation = `<strong>Filtros Combinatórios:</strong> Máx 2 consecutivos. Soma ${sum} controlada (${Math.round(avgSum * 0.75)}-${Math.round(avgSum * 1.25)}). ${evenCount}E/${oddCount}O, ${lowCount}B/${highCount}A.`;
+            break;
+
+        case 'random':
+        default:
+            explanation = `<strong>Aleatório Puro:</strong> Geração sem filtros. ${evenCount} pares, ${oddCount} ímpares, ${lowCount} baixos, ${highCount} altos. Soma: ${sum}. Todas as combinações têm igual probabilidade.`;
+            break;
+    }
+
+    return explanation;
+}
+
 export function generateMultipleCombinations(strategy, count, gameConfig, stats = null, options = {}) {
     const combinations = [];
     const maxAttempts = count * 50; // Safety limit to avoid infinite loops
@@ -1178,10 +1266,13 @@ export function generateMultipleCombinations(strategy, count, gameConfig, stats 
 
             // Check if this combination is unique
             if (!isDuplicateCombination(combination, combinations)) {
+                const explanation = generateExplanation(combination, strategy, gameConfig, stats);
+
                 combinations.push({
                     id: combinations.length + 1,
                     numbers: combination,
-                    strategy
+                    strategy,
+                    explanation
                 });
 
                 // Track used numbers for coverage

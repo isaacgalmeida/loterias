@@ -11,29 +11,35 @@ import { saveAs } from 'file-saver';
  * @param {Object} gameConfig - Game configuration
  */
 export function renderResults(combinations, gameConfig) {
-    const container = document.getElementById('results-display');
-    const section = document.getElementById('results-section');
+  const container = document.getElementById('results-display');
+  const section = document.getElementById('results-section');
 
-    if (!container || !section) return;
+  if (!container || !section) return;
 
-    // Show results section
-    section.style.display = 'block';
+  // Show results section
+  section.style.display = 'block';
 
-    // Scroll to results
-    setTimeout(() => {
-        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+  // Scroll to results
+  setTimeout(() => {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
 
-    const strategyNames = {
-        'smart-mix': '🎯 Mix Inteligente',
-        'weighted': '📊 Baseado em Frequência',
-        'pattern': '⚖️ Baseado em Padrões',
-        'random': '🎲 Aleatório Puro'
-    };
+  const strategyNames = {
+    'smart-mix': '🎯 Mix Inteligente',
+    'frequency': '📊 Baseado em Frequência',
+    'pattern': '⚖️ Baseado em Padrões',
+    'random': '🎲 Aleatório Puro',
+    'balanced': '⚖️ Distribuição Balanceada',
+    'co-occurrence': '🔗 Co-ocorrência',
+    'weighted-random': '📈 Geração Ponderada',
+    'filtered': '🔍 Exclusão de Improváveis',
+    'coverage': '🎯 Varredura de Cobertura',
+    'combinatorial': '🧮 Filtros Combinatórios'
+  };
 
-    const strategyName = strategyNames[combinations[0]?.strategy] || 'Personalizado';
+  const strategyName = strategyNames[combinations[0]?.strategy] || 'Personalizado';
 
-    container.innerHTML = `
+  container.innerHTML = `
     <div class="results-header">
       <div class="results-info">
         <p><strong>${combinations.length}</strong> ${combinations.length === 1 ? 'jogo gerado' : 'jogos gerados'} usando <strong>${strategyName}</strong></p>
@@ -63,112 +69,124 @@ export function renderResults(combinations, gameConfig) {
               </div>
             `).join('')}
           </div>
+          ${combo.explanation ? `
+          <div class="result-explanation">
+            <div class="explanation-icon">💡</div>
+            <div class="explanation-text">${combo.explanation}</div>
+          </div>
+          ` : ''}
         </div>
       `).join('')}
     </div>
   `;
 
-    // Add styles
-    addResultsStyles();
+  // Add styles
+  addResultsStyles();
 
-    // Add event listeners
-    document.getElementById('export-txt-btn').addEventListener('click', () => {
-        exportToTxt(combinations, gameConfig);
-    });
+  // Add event listeners
+  document.getElementById('export-txt-btn').addEventListener('click', () => {
+    exportToTxt(combinations, gameConfig);
+  });
 
-    document.getElementById('copy-btn').addEventListener('click', () => {
-        copyToClipboard(combinations, gameConfig);
-    });
+  document.getElementById('copy-btn').addEventListener('click', () => {
+    copyToClipboard(combinations, gameConfig);
+  });
 }
 
 /**
  * Export combinations to TXT file
  */
 function exportToTxt(combinations, gameConfig) {
-    const strategyNames = {
-        'smart-mix': 'Mix Inteligente',
-        'weighted': 'Baseado em Frequência',
-        'pattern': 'Baseado em Padrões',
-        'random': 'Aleatório Puro'
-    };
+  const strategyNames = {
+    'smart-mix': 'Mix Inteligente',
+    'frequency': 'Baseado em Frequência',
+    'pattern': 'Baseado em Padrões',
+    'random': 'Aleatório Puro',
+    'balanced': 'Distribuição Balanceada',
+    'co-occurrence': 'Co-ocorrência',
+    'weighted-random': 'Geração Ponderada',
+    'filtered': 'Exclusão de Improváveis',
+    'coverage': 'Varredura de Cobertura',
+    'combinatorial': 'Filtros Combinatórios'
+  };
 
-    const strategy = strategyNames[combinations[0]?.strategy] || 'Personalizado';
-    const date = new Date().toLocaleDateString('pt-BR');
+  const strategy = strategyNames[combinations[0]?.strategy] || 'Personalizado';
+  const date = new Date().toLocaleDateString('pt-BR');
 
-    let content = `${gameConfig.name} - Números Gerados\n`;
-    content += `Data: ${date}\n`;
-    content += `Estratégia: ${strategy}\n`;
-    content += `Total de Jogos: ${combinations.length}\n`;
-    content += `\n${'='.repeat(50)}\n\n`;
+  let content = `${gameConfig.name} - Números Gerados\n`;
+  content += `Data: ${date}\n`;
+  content += `Estratégia: ${strategy}\n`;
+  content += `Total de Jogos: ${combinations.length}\n`;
+  content += `\n${'='.repeat(50)}\n\n`;
 
-    combinations.forEach(combo => {
-        content += `Jogo #${combo.id}: ${combo.numbers.join(' - ')}\n`;
-    });
+  combinations.forEach(combo => {
+    content += `Jogo #${combo.id}: ${combo.numbers.join(' - ')}\n`;
+  });
 
-    content += `\n${'='.repeat(50)}\n`;
-    content += `\nGerado por: Sistema de Análise de Loterias\n`;
-    content += `⚠️ Aviso: Jogue com responsabilidade. Loterias são jogos de azar.\n`;
+  content += `\n${'='.repeat(50)}\n`;
+  content += `\nGerado por: Sistema de Análise de Loterias\n`;
+  content += `⚠️ Aviso: Jogue com responsabilidade. Loterias são jogos de azar.\n`;
 
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-    const filename = `${gameConfig.id}_numeros_${date.replace(/\//g, '-')}.txt`;
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const filename = `${gameConfig.id}_numeros_${date.replace(/\//g, '-')}.txt`;
 
-    saveAs(blob, filename);
+  saveAs(blob, filename);
 
-    // Show success message
-    showNotification('✅ Arquivo exportado com sucesso!');
+  // Show success message
+  showNotification('✅ Arquivo exportado com sucesso!');
 }
 
 /**
  * Copy combinations to clipboard
  */
 function copyToClipboard(combinations, gameConfig) {
-    let text = `${gameConfig.name} - Números Gerados\n\n`;
+  let text = `${gameConfig.name} - Números Gerados\n\n`;
 
-    combinations.forEach(combo => {
-        text += `Jogo #${combo.id}: ${combo.numbers.join(' - ')}\n`;
-    });
+  combinations.forEach(combo => {
+    text += `Jogo #${combo.id}: ${combo.numbers.join(' - ')}\n`;
+  });
 
-    navigator.clipboard.writeText(text).then(() => {
-        showNotification('✅ Copiado para a área de transferência!');
-    }).catch(err => {
-        console.error('Failed to copy:', err);
-        showNotification('❌ Erro ao copiar. Tente novamente.');
-    });
+  navigator.clipboard.writeText(text).then(() => {
+    showNotification('✅ Copiado para a área de transferência!');
+  }).catch(err => {
+    console.error('Failed to copy:', err);
+    showNotification('❌ Erro ao copiar. Tente novamente.');
+  });
 }
 
 /**
  * Show notification message
  */
 function showNotification(message) {
-    // Remove existing notification
-    const existing = document.querySelector('.notification');
-    if (existing) existing.remove();
+  // Remove existing notification
+  const existing = document.querySelector('.notification');
+  if (existing) existing.remove();
 
-    const notification = document.createElement('div');
-    notification.className = 'notification';
-    notification.textContent = message;
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
 
-    document.body.appendChild(notification);
+  document.body.appendChild(notification);
 
-    // Animate in
-    setTimeout(() => notification.classList.add('show'), 10);
+  // Animate in
+  setTimeout(() => notification.classList.add('show'), 10);
 
-    // Remove after 3 seconds
-    setTimeout(() => {
-        notification.classList.remove('show');
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.classList.remove('show');
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
 }
 
 /**
  * Add component styles
  */
 function addResultsStyles() {
-    if (document.getElementById('results-styles')) return;
+  if (document.getElementById('results-styles')) return;
 
-    const style = document.createElement('style');
-    style.id = 'results-styles';
-    style.textContent = `
+  const style = document.createElement('style');
+  style.id = 'results-styles';
+  style.textContent = `
     .results-container {
       display: flex;
       flex-direction: column;
@@ -282,6 +300,33 @@ function addResultsStyles() {
       animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55) backwards;
     }
     
+    .result-explanation {
+      margin-top: var(--spacing-lg);
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid var(--glass-border);
+      display: flex;
+      gap: var(--spacing-md);
+      align-items: flex-start;
+    }
+    
+    .explanation-icon {
+      font-size: var(--font-size-xl);
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.5));
+    }
+    
+    .explanation-text {
+      flex: 1;
+      font-size: var(--font-size-sm);
+      line-height: 1.6;
+      color: var(--color-text-secondary);
+    }
+    
+    .explanation-text strong {
+      color: var(--color-text-primary);
+      font-weight: 600;
+    }
+    
     .notification {
       position: fixed;
       bottom: var(--spacing-xl);
@@ -352,5 +397,5 @@ function addResultsStyles() {
     }
   `;
 
-    document.head.appendChild(style);
+  document.head.appendChild(style);
 }
