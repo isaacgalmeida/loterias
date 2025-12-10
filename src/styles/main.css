@@ -347,10 +347,122 @@ section {
   color: var(--color-text-secondary) !important;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Responsive Design */
+
+/* Mobile First - Base styles for mobile */
+@media (max-width: 480px) {
+  :root {
+    --spacing-sm: 0.5rem;
+    --spacing-md: 0.75rem;
+    --spacing-lg: 1rem;
+    --spacing-xl: 1.25rem;
+    --spacing-2xl: 1.5rem;
+    --font-size-sm: 0.8rem;
+    --font-size-base: 0.9rem;
+    --font-size-lg: 1rem;
+    --font-size-xl: 1.125rem;
+    --font-size-2xl: 1.25rem;
+    --font-size-3xl: 1.5rem;
+  }
+
   .container {
     padding: 0 var(--spacing-md);
+    max-width: 100%;
+  }
+
+  /* Header adjustments */
+  .app-header {
+    padding: var(--spacing-lg) 0;
+  }
+
+  .logo {
+    font-size: var(--font-size-2xl);
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .logo-icon {
+    font-size: var(--font-size-2xl);
+  }
+
+  .tagline {
+    font-size: var(--font-size-base);
+    text-align: center;
+  }
+
+  .header-links {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+  }
+
+  .lottery-link {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    justify-content: center;
+  }
+
+  /* Game selector */
+  .game-selector {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+
+  .game-btn {
+    padding: var(--spacing-lg);
+  }
+
+  .game-icon {
+    font-size: 2rem;
+  }
+
+  .game-name {
+    font-size: var(--font-size-lg);
+  }
+
+  /* Section titles */
+  .section-title {
+    font-size: var(--font-size-xl);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+  }
+
+  /* Cards */
+  .card,
+  .generator-card,
+  .stats-card {
+    padding: var(--spacing-lg);
+  }
+
+  /* Main content spacing */
+  .main-content {
+    padding: var(--spacing-xl) 0;
+  }
+
+  section {
+    margin-bottom: var(--spacing-xl);
+  }
+
+  /* Footer */
+  .disclaimer {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-md);
+    text-align: left;
+    line-height: 1.5;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-base);
+    width: 100%;
+  }
+}
+
+/* Small tablets and large phones */
+@media (min-width: 481px) and (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-lg);
   }
 
   .logo {
@@ -359,5 +471,137 @@ section {
 
   .game-selector {
     grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+
+  .header-links {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .lottery-link {
+    flex: 1;
+    min-width: 200px;
+    justify-content: center;
+  }
+}
+
+/* Tablets */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding: 0 var(--spacing-lg);
+  }
+
+  .game-selector {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Large screens */
+@media (min-width: 1025px) {
+  .container {
+    max-width: 1200px;
+  }
+
+  .game-selector {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 800px;
+    margin: 0 auto var(--spacing-xl);
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .app-header {
+    padding: var(--spacing-md) 0;
+  }
+
+  .logo {
+    font-size: var(--font-size-xl);
+  }
+
+  .header-links {
+    margin-top: var(--spacing-sm);
+  }
+
+  .main-content {
+    padding: var(--spacing-lg) 0;
+  }
+
+  section {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .logo-icon,
+  .game-icon {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .spinner {
+    animation: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-muted: #94a3b8;
+  }
+
+  body {
+    background: #0f172a;
+  }
+
+  .card,
+  .generator-card,
+  .stats-card {
+    background: rgba(30, 41, 59, 0.8);
+    border-color: rgba(148, 163, 184, 0.2);
+  }
+}
+
+/* Print styles */
+@media print {
+  .app-header,
+  .app-footer,
+  .generator-section,
+  .btn-primary,
+  .btn-secondary {
+    display: none !important;
+  }
+
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .result-card {
+    break-inside: avoid;
+    border: 1px solid #000;
+    background: white !important;
+    color: black !important;
   }
 }

@@ -372,7 +372,76 @@ function addResultsStyles() {
       }
     }
     
-    @media (max-width: 768px) {
+    /* Mobile responsiveness */
+    @media (max-width: 480px) {
+      .results-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-md);
+        padding: var(--spacing-md);
+      }
+      
+      .results-info p {
+        font-size: var(--font-size-sm);
+        text-align: center;
+      }
+      
+      .results-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+      }
+      
+      .btn-secondary {
+        flex: 1;
+        justify-content: center;
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+      }
+      
+      .results-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+      
+      .result-card {
+        padding: var(--spacing-md);
+      }
+      
+      .result-numbers {
+        gap: var(--spacing-xs);
+      }
+      
+      .number-ball-large {
+        width: 40px;
+        height: 40px;
+        font-size: var(--font-size-base);
+      }
+      
+      .result-explanation {
+        margin-top: var(--spacing-md);
+        padding-top: var(--spacing-md);
+        gap: var(--spacing-sm);
+      }
+      
+      .explanation-icon {
+        font-size: var(--font-size-lg);
+      }
+      
+      .explanation-text {
+        font-size: var(--font-size-xs);
+      }
+      
+      .notification {
+        left: var(--spacing-md);
+        right: var(--spacing-md);
+        bottom: var(--spacing-md);
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+      }
+    }
+    
+    @media (min-width: 481px) and (max-width: 768px) {
       .results-header {
         flex-direction: column;
         align-items: flex-start;
@@ -380,6 +449,7 @@ function addResultsStyles() {
       
       .results-actions {
         width: 100%;
+        flex-direction: row;
       }
       
       .btn-secondary {
@@ -393,6 +463,37 @@ function addResultsStyles() {
       .notification {
         left: var(--spacing-lg);
         right: var(--spacing-lg);
+      }
+    }
+    
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .results-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1025px) {
+      .results-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      }
+    }
+    
+    /* Landscape orientation adjustments */
+    @media (max-width: 768px) and (orientation: landscape) {
+      .results-header {
+        flex-direction: row;
+        align-items: center;
+      }
+      
+      .results-actions {
+        width: auto;
+        flex-direction: row;
+      }
+      
+      .number-ball-large {
+        width: 36px;
+        height: 36px;
+        font-size: var(--font-size-sm);
       }
     }
   `;

@@ -355,13 +355,99 @@ function addStatsDashboardStyles() {
       padding: var(--spacing-md);
     }
     
-    @media (max-width: 768px) {
+    /* Mobile responsiveness */
+    @media (max-width: 480px) {
+      .stats-overview {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-sm);
+      }
+      
+      .stat-card {
+        padding: var(--spacing-sm);
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-sm);
+      }
+      
+      .stat-icon {
+        font-size: var(--font-size-2xl);
+      }
+      
+      .stat-value {
+        font-size: var(--font-size-xl);
+      }
+      
+      .stat-label {
+        font-size: var(--font-size-xs);
+      }
+      
+      .stats-details {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+      
+      .stats-section {
+        padding: var(--spacing-md);
+      }
+      
+      .stats-section h3 {
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-md);
+        text-align: center;
+      }
+      
+      .number-ball {
+        width: 32px;
+        height: 32px;
+        font-size: var(--font-size-sm);
+      }
+      
+      .number-item, .pattern-item {
+        padding: var(--spacing-sm);
+        gap: var(--spacing-sm);
+      }
+      
+      .number-stats, .pattern-count {
+        font-size: var(--font-size-xs);
+      }
+      
+      .chart-container {
+        height: 200px;
+        padding: var(--spacing-sm);
+      }
+    }
+    
+    @media (min-width: 481px) and (max-width: 768px) {
+      .stats-overview {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
       .stats-details {
         grid-template-columns: 1fr;
       }
       
       .chart-container {
         height: 250px;
+      }
+    }
+    
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .stats-overview {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      
+      .stats-details {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (min-width: 1025px) {
+      .stats-overview {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      
+      .stats-details {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       }
     }
   `;

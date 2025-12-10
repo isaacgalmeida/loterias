@@ -242,13 +242,51 @@ function addGeneratorStyles() {
       animation: spin 0.8s linear infinite;
     }
     
-    @media (max-width: 768px) {
+    /* Mobile responsiveness */
+    @media (max-width: 480px) {
+      .generator-form {
+        gap: var(--spacing-lg);
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+      }
+      
+      .form-group label {
+        font-size: var(--font-size-sm);
+      }
+      
+      .form-input, .form-select {
+        padding: var(--spacing-sm);
+        font-size: var(--font-size-sm);
+      }
+      
+      .btn-primary {
+        width: 100%;
+        padding: var(--spacing-md) var(--spacing-lg);
+        font-size: var(--font-size-base);
+      }
+      
+      .info-card {
+        padding: var(--spacing-md);
+        font-size: var(--font-size-sm);
+      }
+    }
+    
+    @media (min-width: 481px) and (max-width: 768px) {
       .form-row {
         grid-template-columns: 1fr;
       }
       
       .btn-primary {
         width: 100%;
+      }
+    }
+    
+    @media (min-width: 769px) {
+      .form-row {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
       }
     }
   `;
