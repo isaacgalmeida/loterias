@@ -16,7 +16,7 @@ npm install -g vercel
 vercel dev
 
 # 3. Acessar no navegador:
-# http://localhost:3000/admin.html
+# http://localhost:3000/status.html
 # http://localhost:3000/api/lottery-status
 # http://localhost:3000/api/sync-lottery
 ```

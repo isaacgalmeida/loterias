@@ -64,7 +64,7 @@ O sistema está configurado para executar sincronização automática diária us
 ### **Produção (após deploy):**
 - **Sincronização:** `https://seu-dominio.vercel.app/api/sync-lottery`
 - **Status:** `https://seu-dominio.vercel.app/api/lottery-status`  
-- **Admin:** `https://seu-dominio.vercel.app/admin.html`
+- **Status:** `https://seu-dominio.vercel.app/status.html`
 
 ### **Desenvolvimento Local:**
 ```bash
@@ -77,7 +77,7 @@ vercel dev
 # URLs locais:
 # http://localhost:3000/api/sync-lottery
 # http://localhost:3000/api/lottery-status
-# http://localhost:3000/admin.html
+# http://localhost:3000/status.html
 ```
 
 ## 🛠️ Comandos Úteis
@@ -113,11 +113,11 @@ vercel --prod
 3. Vá em **Functions** → **View Function Logs**
 4. Filtre por `/api/sync-lottery`
 
-### **Painel Admin:**
-- Acesse `https://seu-dominio.vercel.app/admin.html`
-- Monitore status em tempo real
-- Execute sincronização manual quando necessário
-- Visualize logs de operações
+### **Página de Status:**
+- Acesse `https://seu-dominio.vercel.app/status.html`
+- Monitore status das loterias em tempo real
+- Atualização automática a cada 30 segundos
+- Visualize estatísticas de sincronização
 
 ## ⚙️ Configurações Avançadas
 
