@@ -18,29 +18,25 @@ export default async function handler(req, res) {
     try {
         console.log('📊 Verificando status das loterias...');
         
-        // Carrega dados diretamente dos arquivos JSON
-        const fs = await import('fs/promises');
-        const path = await import('path');
-        
         const status = {};
         const lotteries = ['lotofacil', 'megasena'];
         
+        // Constrói URL base
+        const baseUrl = req.headers.host ? `https://${req.headers.host}` : 'https://loterias.guiadainternet.com';
+        
         for (const lotteryId of lotteries) {
             try {
-                // Tenta carregar arquivo JSON diretamente
-                const filePath = path.join(process.cwd(), 'public', 'data', `${lotteryId}.json`);
+                // Carrega dados via fetch (sabemos que funciona)
+                const dataUrl = `${baseUrl}/data/${lotteryId}.json`;
+                console.log(`Carregando: ${dataUrl}`);
                 
-                let fileData;
-                try {
-                    const fileContent = await fs.readFile(filePath, 'utf8');
-                    fileData = JSON.parse(fileContent);
-                } catch (fileError) {
-                    status[lotteryId] = {
-                        success: false,
-                        message: 'Arquivo de cache não encontrado'
-                    };
-                    continue;
+                const response = await fetch(dataUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
+                
+                const fileData = await response.json();
+                console.log(`✅ Carregado: ${lotteryId} - ${fileData.draws?.length || 0} concursos`);
                 
                 const draws = fileData.draws || [];
                 

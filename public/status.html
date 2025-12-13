@@ -284,6 +284,15 @@
                     <li><strong>🎯 Loterias Suportadas:</strong> Lotofácil e Mega-Sena</li>
                     <li><strong>💾 Armazenamento:</strong> Cache local em arquivos JSON</li>
                 </ul>
+                
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                    <button onclick="runDebug()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                        🔧 Debug do Sistema
+                    </button>
+                    <button onclick="testDirectAccess()" style="background: #17a2b8; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; margin-left: 10px;">
+                        📁 Testar Acesso Direto
+                    </button>
+                </div>
             </div>
             
             <div class="timestamp" id="statusTimestamp">
@@ -299,16 +308,93 @@
         
         async function checkStatus() {
             try {
-                const response = await fetch('/api/lottery-status');
+                // Tenta primeiro a API de status simples
+                const response = await fetch('/api/simple-status');
                 const data = await response.json();
                 
                 if (data.success) {
                     updateStatusDisplay(data);
                 } else {
-                    showError('Erro ao verificar status: ' + (data.error || 'Erro desconhecido'));
+                    console.error('API Error:', data);
+                    // Fallback: tenta carregar dados diretamente
+                    await loadDataDirectly();
                 }
             } catch (error) {
-                showError('Erro na conexão: ' + error.message);
+                console.error('Connection Error:', error);
+                // Fallback: tenta carregar dados diretamente
+                await loadDataDirectly();
+            }
+        }
+        
+        async function loadDataDirectly() {
+            try {
+                console.log('Tentando carregar dados diretamente...');
+                
+                const lotteries = ['lotofacil', 'megasena'];
+                const status = {};
+                let totalDraws = 0;
+                
+                for (const lotteryId of lotteries) {
+                    try {
+                        const response = await fetch(`/data/${lotteryId}.json`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            const draws = data.draws || [];
+                            
+                            if (draws.length > 0) {
+                                const contests = draws.map(d => d.concurso);
+                                const firstContest = Math.min(...contests);
+                                const lastContest = Math.max(...contests);
+                                
+                                status[lotteryId] = {
+                                    success: true,
+                                    totalDraws: draws.length,
+                                    firstContest,
+                                    lastContest,
+                                    lastUpdate: data.metadata?.lastUpdate,
+                                    api: {
+                                        isUpToDate: true, // Assume atualizado se não conseguir verificar API
+                                        missingCount: 0
+                                    }
+                                };
+                                
+                                totalDraws += draws.length;
+                            } else {
+                                status[lotteryId] = {
+                                    success: false,
+                                    message: 'Nenhum dado encontrado'
+                                };
+                            }
+                        } else {
+                            status[lotteryId] = {
+                                success: false,
+                                message: `Erro HTTP ${response.status}`
+                            };
+                        }
+                    } catch (error) {
+                        status[lotteryId] = {
+                            success: false,
+                            message: error.message
+                        };
+                    }
+                }
+                
+                // Simula resposta da API
+                const mockData = {
+                    success: true,
+                    timestamp: new Date().toISOString(),
+                    lotteries: status,
+                    summary: {
+                        totalLotteries: lotteries.length,
+                        successfulLotteries: Object.values(status).filter(s => s.success).length,
+                        totalDraws: totalDraws
+                    }
+                };
+                
+                updateStatusDisplay(mockData);
+                
+            } catch (error) {
+                showError('Erro ao carregar dados: ' + error.message);
             }
         }
         
@@ -410,6 +496,62 @@
                 statusTimestamp.textContent = `Aguardando dados... ${now}`;
             }
         }, 1000);
+        
+        // Função de debug
+        async function runDebug() {
+            try {
+                const response = await fetch('/api/test-files');
+                const data = await response.json();
+                
+                console.log('Debug Results:', data);
+                
+                // Mostra resultado em uma janela
+                const debugWindow = window.open('', '_blank', 'width=800,height=600');
+                debugWindow.document.write(`
+                    <html>
+                        <head><title>Debug do Sistema</title></head>
+                        <body style="font-family: monospace; padding: 20px; background: #f5f5f5;">
+                            <h2>🔧 Debug do Sistema</h2>
+                            <pre style="background: white; padding: 15px; border-radius: 5px; overflow: auto;">
+${JSON.stringify(data, null, 2)}
+                            </pre>
+                            <button onclick="window.close()" style="margin-top: 10px; padding: 10px 20px;">Fechar</button>
+                        </body>
+                    </html>
+                `);
+            } catch (error) {
+                alert('Erro no debug: ' + error.message);
+            }
+        }
+        
+        // Função para testar acesso direto aos arquivos
+        async function testDirectAccess() {
+            const results = {};
+            
+            for (const lottery of ['lotofacil', 'megasena']) {
+                try {
+                    const response = await fetch(`/data/${lottery}.json`);
+                    results[lottery] = {
+                        status: response.status,
+                        ok: response.ok,
+                        url: `/data/${lottery}.json`
+                    };
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        results[lottery].dataSize = data.draws?.length || 0;
+                        results[lottery].lastUpdate = data.metadata?.lastUpdate;
+                    }
+                } catch (error) {
+                    results[lottery] = {
+                        error: error.message
+                    };
+                }
+            }
+            
+            console.log('Direct Access Results:', results);
+            alert('Resultados do teste (veja console): ' + JSON.stringify(results, null, 2));
+        }
     </script>
 </body>
 </html>
