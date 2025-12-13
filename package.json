@@ -9,7 +9,9 @@
     "sync": "node sync-missing.js",
     "sync:lotofacil": "node sync-missing.js lotofacil",
     "sync:megasena": "node sync-missing.js megasena",
-    "sync:help": "node sync-missing.js --help"
+    "sync:help": "node sync-missing.js --help",
+    "vercel:dev": "vercel dev",
+    "vercel:deploy": "vercel --prod"
   },
   "keywords": [],
   "author": "",
