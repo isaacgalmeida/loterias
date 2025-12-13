@@ -297,8 +297,8 @@ class LotteryDataManager {
      * @returns {Promise<Array>} Array de sorteios
      */
     async fetchContestsInBatches(contestNumbers) {
-        const batchSize = 10; // Lotes maiores para download mais rápido
-        const delay = 200; // Delay menor para acelerar o processo
+        const batchSize = 5; // Lotes menores para evitar erro 429
+        const delay = 1000; // Delay maior para ser mais conservador com a API
         const allDraws = [];
         
         for (let i = 0; i < contestNumbers.length; i += batchSize) {

@@ -6,13 +6,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "sync": "node src/scripts/syncLotteryData.js",
-    "sync:full": "node src/scripts/syncLotteryData.js --full",
-    "sync:schedule": "node -e \"import('./src/scripts/syncLotteryData.js').then(m => m.scheduleDailySync())\"",
-    "download:all": "node download-all-data.js",
-    "download:smart": "node download-smart.js",
-    "download:optimized": "node download-optimized.js",
-    "download:recent": "node download-recent.js"
+    "sync": "node sync-missing.js",
+    "sync:lotofacil": "node sync-missing.js lotofacil",
+    "sync:megasena": "node sync-missing.js megasena",
+    "sync:help": "node sync-missing.js --help"
   },
   "keywords": [],
   "author": "",

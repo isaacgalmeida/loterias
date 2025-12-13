@@ -30,9 +30,9 @@ O sistema foi atualizado para usar um **cache local inteligente** que substitui 
 
 ### **Core**
 - `src/services/dataManager.js` - Gerenciador principal do cache
-- `src/scripts/syncLotteryData.js` - Script de sincronização
-- `public/data/lotofacil.json` - Cache da Lotofácil
-- `public/data/megasena.json` - Cache da Mega-Sena
+- `sync-missing.js` - Script de sincronização inteligente
+- `public/data/lotofacil.json` - Cache da Lotofácil (3560 concursos)
+- `public/data/megasena.json` - Cache da Mega-Sena (2887 concursos)
 
 ### **Logs e Backups**
 - `logs/sync.log` - Log das sincronizações
@@ -40,17 +40,20 @@ O sistema foi atualizado para usar um **cache local inteligente** que substitui 
 
 ## Como Usar
 
-### **Sincronização Manual**
+### **Sincronização Inteligente**
 
 ```bash
-# Sincronização completa (baixa todos os dados)
-npm run sync:full
-
-# Sincronização incremental (apenas novos)
+# Sincroniza ambas as loterias (apenas concursos faltantes)
 npm run sync
 
-# Agendar sincronização diária
-npm run sync:schedule
+# Sincroniza apenas Lotofácil
+npm run sync:lotofacil
+
+# Sincroniza apenas Mega-Sena  
+npm run sync:megasena
+
+# Mostra ajuda do comando
+npm run sync:help
 ```
 
 ### **No Código da Aplicação**
@@ -97,6 +100,36 @@ const { results, errors } = await dataManager.syncAllLotteries();
 - **Validação**: Números válidos e quantidade correta
 - **Ordenação**: Sempre por número do concurso
 - **Deduplicação**: Remove concursos duplicados
+
+## Script de Sincronização Inteligente
+
+### **Características do `sync-missing.js`**
+- **Análise inteligente**: Detecta automaticamente quais concursos faltam
+- **Sincronização seletiva**: Baixa apenas os dados que não existem localmente
+- **Suporte específico**: Permite sincronizar loterias individuais
+- **Detecção de lacunas**: Identifica e preenche buracos no histórico
+- **Relatório detalhado**: Mostra estatísticas completas após sincronização
+
+### **Uso do Script**
+```bash
+# Sincronizar ambas as loterias
+node sync-missing.js
+
+# Sincronizar apenas uma loteria específica
+node sync-missing.js lotofacil
+node sync-missing.js megasena
+
+# Mostrar ajuda
+node sync-missing.js --help
+```
+
+### **Estratégia de Sincronização**
+1. **Análise local**: Carrega dados do arquivo JSON existente
+2. **Consulta API**: Verifica último concurso disponível na API oficial
+3. **Identificação de lacunas**: Detecta concursos faltantes (buracos + novos)
+4. **Download seletivo**: Baixa apenas os concursos que não existem
+5. **Merge inteligente**: Combina dados existentes com novos
+6. **Atualização**: Salva arquivo JSON atualizado
 
 ## Funcionalidades Avançadas
 
@@ -210,4 +243,8 @@ const lotofacilData = await dataManager.getLotteryData('lotofacil');
 - Backup automático configurado
 - Aplicação principal compatível
 
-**Próximos passos**: Configurar execução diária automática via cron job ou task scheduler.
+**Sistema finalizado e operacional**: 
+- ✅ Lotofácil: 3560 concursos completos
+- ✅ Mega-Sena: 2887 concursos completos  
+- ✅ Sincronização inteligente implementada
+- ✅ Script único para manutenção (`sync-missing.js`)
