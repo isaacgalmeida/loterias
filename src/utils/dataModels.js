@@ -11,7 +11,7 @@ export const GAMES = {
         maxNumber: 25,
         numbersPerDraw: 15,
         description: '15 números de 1 a 25',
-        excelFile: '/Lotofacil.xlsx'
+        apiUrl: 'https://servicebus2.caixa.gov.br/portaldeloterias/api/lotofacil'
     },
     MEGASENA: {
         id: 'megasena',
@@ -21,7 +21,7 @@ export const GAMES = {
         maxNumber: 60,
         numbersPerDraw: 6,
         description: '6 números de 1 a 60',
-        excelFile: '/Mega-Sena.xlsx'
+        apiUrl: 'https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena'
     }
 };
 
