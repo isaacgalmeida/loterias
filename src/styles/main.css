@@ -1,15 +1,25 @@
-/* Design System & CSS Variables - Caixa Theme */
+/* Design System & CSS Variables - Light Theme (Default) */
 :root {
-  /* Colors */
-  --color-caixa-blue: #0066B3;
+  /* Theme Colors - Light */
+  --color-caixa-blue: #0066b3;
   --color-lotofacil-green: #209869;
-  --color-megasena-purple: #6B3FA0;
-  --color-text-primary: #333;
-  --color-text-secondary: #666;
-  --color-text-muted: #999;
+  --color-megasena-purple: #6b3fa0;
+  --color-text-primary: #1e293b;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-background: #ffffff;
+  --color-background-secondary: #f8fafc;
+  --color-background-tertiary: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-border-hover: #cbd5e1;
+  --color-card-bg: #ffffff;
+  --color-input-bg: #ffffff;
+  --color-shadow: rgba(0, 0, 0, 0.1);
+  --color-shadow-hover: rgba(0, 0, 0, 0.15);
 
   /* Gradients */
-  --gradient-caixa: linear-gradient(135deg, #0066B3 0%, #004d87 100%);
+  --gradient-caixa: linear-gradient(135deg, #0066b3 0%, #004d87 100%);
+  --gradient-background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 
   /* Spacing */
   --spacing-sm: 0.75rem;
@@ -19,7 +29,7 @@
   --spacing-2xl: 3rem;
 
   /* Typography */
-  --font-family: 'Inter', sans-serif;
+  --font-family: "Inter", sans-serif;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.125rem;
@@ -33,20 +43,46 @@
   --radius-full: 9999px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 3px var(--color-shadow);
+  --shadow-md: 0 4px 6px var(--color-shadow);
+  --shadow-lg: 0 10px 15px var(--color-shadow);
 
   /* Transitions */
   --transition: 250ms ease-in-out;
 
   /* Component Variables */
   --glass-bg: rgba(255, 255, 255, 0.9);
-  --glass-border: #e0e0e0;
+  --glass-border: var(--color-border);
   --gradient-primary: var(--gradient-caixa);
   --transition-base: var(--transition);
   --transition-fast: 150ms ease-in-out;
   --font-size-xs: 0.75rem;
+}
+
+/* Dark Theme Variables */
+[data-theme="dark"] {
+  /* Theme Colors - Dark */
+  --color-text-primary: #f1f5f9;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-background: #0f172a;
+  --color-background-secondary: #1e293b;
+  --color-background-tertiary: #334155;
+  --color-border: #334155;
+  --color-border-hover: #475569;
+  --color-card-bg: #1e293b;
+  --color-input-bg: #334155;
+  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-shadow-hover: rgba(0, 0, 0, 0.4);
+
+  /* Dark Gradients */
+  --gradient-background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --glass-bg: rgba(30, 41, 59, 0.9);
+  --glass-border: var(--color-border);
+
+  /* Adjust component colors for dark theme */
+  --color-lotofacil-green: #22c55e;
+  --color-megasena-purple: #8b5cf6;
 }
 
 *,
@@ -59,9 +95,10 @@
 
 body {
   font-family: var(--font-family);
-  background: #f5f5f5;
+  background: var(--gradient-background);
   color: var(--color-text-primary);
   line-height: 1.6;
+  transition: background-color var(--transition), color var(--transition);
 }
 
 .container {
@@ -76,6 +113,36 @@ body {
   padding: var(--spacing-xl) 0;
   text-align: center;
   box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+  position: absolute;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full);
+  padding: var(--spacing-sm);
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  color: white;
+  font-size: 1.25rem;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.theme-toggle:active {
+  transform: scale(0.95);
 }
 
 .logo {
@@ -152,8 +219,8 @@ section {
 }
 
 .game-btn {
-  background: white;
-  border: 2px solid #e0e0e0;
+  background: var(--color-card-bg);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   cursor: pointer;
@@ -172,14 +239,22 @@ section {
 
 .game-btn[data-game="lotofacil"].active {
   border-color: var(--color-lotofacil-green);
-  background: linear-gradient(to bottom, white, #f0fdf4);
-  box-shadow: 0 4px 12px rgba(32, 152, 105, 0.2);
+  background: linear-gradient(
+    to bottom,
+    var(--color-card-bg),
+    rgba(34, 197, 94, 0.1)
+  );
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
 }
 
 .game-btn[data-game="megasena"].active {
   border-color: var(--color-megasena-purple);
-  background: linear-gradient(to bottom, white, #faf5ff);
-  box-shadow: 0 4px 12px rgba(107, 63, 160, 0.2);
+  background: linear-gradient(
+    to bottom,
+    var(--color-card-bg),
+    rgba(139, 92, 246, 0.1)
+  );
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
 }
 
 .game-icon {
@@ -200,8 +275,8 @@ section {
 .card,
 .generator-card,
 .stats-card {
-  background: white;
-  border: 1px solid #e0e0e0;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--spacing-xl);
   box-shadow: var(--shadow-sm);
@@ -227,7 +302,7 @@ section {
 .spinner {
   width: 64px;
   height: 64px;
-  border: 4px solid #e0e0e0;
+  border: 4px solid var(--color-border);
   border-top-color: var(--color-caixa-blue);
   border-radius: var(--radius-full);
   animation: spin 1s linear infinite;
@@ -270,8 +345,8 @@ section {
 .app-footer {
   margin-top: var(--spacing-2xl);
   padding: var(--spacing-xl) 0;
-  border-top: 1px solid #e0e0e0;
-  background: white;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-card-bg);
 }
 
 .disclaimer {
@@ -286,16 +361,18 @@ section {
   border: 1px solid rgba(239, 68, 68, 0.1);
 }
 
-/* Component Overrides - Light Theme */
+/* Component Overrides - Theme Adaptive */
 .number-item,
 .pattern-item {
-  background: #f8f9fa !important;
-  border: 1px solid #e9ecef !important;
+  background: var(--color-background-secondary) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+  transition: all var(--transition) !important;
 }
 
 .number-item:hover,
 .pattern-item:hover {
-  background: #e3f2fd !important;
+  background: var(--color-background-tertiary) !important;
   border-color: var(--color-caixa-blue) !important;
 }
 
@@ -310,40 +387,53 @@ section {
 }
 
 .stat-card {
-  background: white !important;
-  border: 1px solid #e0e0e0 !important;
+  background: var(--color-card-bg) !important;
+  border: 1px solid var(--color-border) !important;
 }
 
 .stats-section {
-  background: white !important;
-  border: 1px solid #e0e0e0 !important;
+  background: var(--color-card-bg) !important;
+  border: 1px solid var(--color-border) !important;
 }
 
 .result-card {
-  background: white !important;
-  border: 1px solid #e0e0e0 !important;
+  background: var(--color-card-bg) !important;
+  border: 1px solid var(--color-border) !important;
 }
 
 .results-header {
-  background: white !important;
-  border: 1px solid #e0e0e0 !important;
+  background: var(--color-card-bg) !important;
+  border: 1px solid var(--color-border) !important;
 }
 
 .form-input,
 .form-select {
-  background: white !important;
-  border: 1px solid #e0e0e0 !important;
+  background: var(--color-input-bg) !important;
+  border: 1px solid var(--color-border) !important;
   color: var(--color-text-primary) !important;
 }
 
+.form-input:focus,
+.form-select:focus {
+  border-color: var(--color-caixa-blue) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 102, 179, 0.1) !important;
+}
+
 .btn-secondary {
-  background: white !important;
-  border: 1px solid #e0e0e0 !important;
+  background: var(--color-card-bg) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.btn-secondary:hover {
+  background: var(--color-background-secondary) !important;
+  border-color: var(--color-border-hover) !important;
 }
 
 .info-card {
-  background: rgba(0, 102, 179, 0.05) !important;
-  border: 1px solid rgba(0, 102, 179, 0.15) !important;
+  background: rgba(0, 102, 179, 0.1) !important;
+  border: 1px solid rgba(0, 102, 179, 0.2) !important;
   color: var(--color-text-secondary) !important;
 }
 
@@ -558,24 +648,65 @@ section {
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-text-primary: #f8fafc;
-    --color-text-secondary: #cbd5e1;
-    --color-text-muted: #94a3b8;
+/* Theme Toggle Responsive */
+@media (max-width: 768px) {
+  .theme-toggle {
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
   }
+}
 
-  body {
-    background: #0f172a;
-  }
+/* Smooth theme transitions */
+*,
+*::before,
+*::after {
+  transition: background-color var(--transition), border-color var(--transition),
+    color var(--transition), box-shadow var(--transition);
+}
 
-  .card,
-  .generator-card,
-  .stats-card {
-    background: rgba(30, 41, 59, 0.8);
-    border-color: rgba(148, 163, 184, 0.2);
-  }
+/* Dark theme specific adjustments */
+[data-theme="dark"] .lottery-link {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .lottery-link:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark theme for game selector names */
+[data-theme="dark"] .game-name {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .game-desc {
+  color: var(--color-text-secondary) !important;
+}
+
+[data-theme="dark"] .disclaimer {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Scrollbar styling for dark theme */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 8px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--color-background-secondary);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
 }
 
 /* Print styles */
@@ -603,5 +734,202 @@ section {
     border: 1px solid #000;
     background: white !important;
     color: black !important;
+  }
+}
+
+/* Additional Dark Theme Styles for Generated Numbers */
+[data-theme="dark"] .number-ball {
+  background: var(--color-background-tertiary) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .number-ball.lotofacil {
+  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+  color: white !important;
+  border-color: #22c55e !important;
+}
+
+[data-theme="dark"] .number-ball.megasena {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+  color: white !important;
+  border-color: #8b5cf6 !important;
+}
+
+/* Dark theme for frequency bars */
+[data-theme="dark"] .frequency-bar {
+  background: var(--color-background-tertiary) !important;
+}
+
+[data-theme="dark"] .frequency-fill {
+  background: linear-gradient(
+    90deg,
+    var(--color-caixa-blue),
+    #0ea5e9
+  ) !important;
+}
+
+/* Dark theme for charts and graphs */
+[data-theme="dark"] .chart-container {
+  background: var(--color-card-bg) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+/* Dark theme for tooltips */
+[data-theme="dark"] .tooltip {
+  background: var(--color-background-secondary) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Dark theme for modals */
+[data-theme="dark"] .modal {
+  background: var(--color-card-bg) !important;
+  border: 1px solid var(--color-border) !important;
+}
+
+[data-theme="dark"] .modal-overlay {
+  background: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Dark theme for dropdowns */
+[data-theme="dark"] .dropdown-menu {
+  background: var(--color-card-bg) !important;
+  border: 1px solid var(--color-border) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+  background: var(--color-background-secondary) !important;
+}
+
+/* Dark theme for loading states */
+[data-theme="dark"] .loading-state {
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .loading-state small {
+  color: var(--color-text-secondary) !important;
+}
+
+/* Dark theme for success/error messages */
+[data-theme="dark"] .success-message {
+  background: rgba(34, 197, 94, 0.1) !important;
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  color: #22c55e !important;
+}
+
+[data-theme="dark"] .error-message {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #ef4444 !important;
+}
+
+[data-theme="dark"] .warning-message {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border-color: rgba(245, 158, 11, 0.3) !important;
+  color: #f59e0b !important;
+}
+
+/* Dark theme for code blocks */
+[data-theme="dark"] .code-block {
+  background: var(--color-background-secondary) !important;
+  border: 1px solid var(--color-border) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Dark theme for tables */
+[data-theme="dark"] .table {
+  background: var(--color-card-bg) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .table th {
+  background: var(--color-background-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .table td {
+  border-color: var(--color-border) !important;
+}
+
+[data-theme="dark"] .table tr:hover {
+  background: var(--color-background-secondary) !important;
+}
+
+/* Dark theme for badges */
+[data-theme="dark"] .badge {
+  background: var(--color-background-tertiary) !important;
+  color: var(--color-text-primary) !important;
+}
+
+[data-theme="dark"] .badge.primary {
+  background: var(--color-caixa-blue) !important;
+  color: white !important;
+}
+
+[data-theme="dark"] .badge.success {
+  background: #22c55e !important;
+  color: white !important;
+}
+
+[data-theme="dark"] .badge.warning {
+  background: #f59e0b !important;
+  color: white !important;
+}
+
+[data-theme="dark"] .badge.error {
+  background: #ef4444 !important;
+  color: white !important;
+}
+
+/* Smooth theme transition for all elements */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+    color 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+/* Preserve fast transitions for interactive elements */
+.btn-primary,
+.btn-secondary,
+.game-btn,
+.theme-toggle,
+.lottery-link {
+  transition: all 0.25s ease !important;
+}
+
+/* Theme toggle animation */
+.theme-toggle {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.05) !important;
+}
+
+.theme-toggle:active {
+  transform: scale(0.95) !important;
+}
+
+/* Focus styles for accessibility */
+.theme-toggle:focus {
+  outline: 2px solid var(--color-caixa-blue);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  [data-theme="dark"] {
+    --color-text-primary: #ffffff;
+    --color-background: #000000;
+    --color-card-bg: #1a1a1a;
+    --color-border: #666666;
+  }
+}
+
+/* Reduced motion for theme transitions */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
   }
 }

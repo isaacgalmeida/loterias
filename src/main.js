@@ -7,6 +7,98 @@ import { renderNumberGenerator } from './components/NumberGenerator.js';
 import { renderResults } from './components/ResultsDisplay.js';
 
 /**
+ * Theme Management System
+ */
+class ThemeManager {
+    constructor() {
+        this.currentTheme = this.getStoredTheme() || 'light';
+        this.init();
+    }
+
+    init() {
+        // Apply stored theme
+        this.applyTheme(this.currentTheme);
+
+        // Setup theme toggle button
+        this.setupThemeToggle();
+
+        // Listen for system theme changes
+        this.listenForSystemThemeChanges();
+    }
+
+    getStoredTheme() {
+        return localStorage.getItem('lottery-theme');
+    }
+
+    storeTheme(theme) {
+        localStorage.setItem('lottery-theme', theme);
+    }
+
+    applyTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        this.currentTheme = theme;
+        this.updateThemeIcon();
+        this.storeTheme(theme);
+
+        // Update meta theme-color for mobile browsers
+        const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+        if (metaThemeColor) {
+            metaThemeColor.content = theme === 'dark' ? '#0f172a' : '#0066B3';
+        }
+    }
+
+    updateThemeIcon() {
+        const themeIcon = document.getElementById('theme-icon');
+        if (themeIcon) {
+            themeIcon.textContent = this.currentTheme === 'dark' ? '☀️' : '🌙';
+        }
+    }
+
+    toggleTheme() {
+        const newTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+        this.applyTheme(newTheme);
+
+        // Add a subtle animation feedback
+        const toggleButton = document.getElementById('theme-toggle');
+        if (toggleButton) {
+            toggleButton.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                toggleButton.style.transform = 'scale(1)';
+            }, 150);
+        }
+    }
+
+    setupThemeToggle() {
+        const themeToggle = document.getElementById('theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => this.toggleTheme());
+
+            // Add keyboard support
+            themeToggle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.toggleTheme();
+                }
+            });
+        }
+    }
+
+    listenForSystemThemeChanges() {
+        // Only listen if user hasn't manually set a theme
+        if (!this.getStoredTheme()) {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            mediaQuery.addListener((e) => {
+                const systemTheme = e.matches ? 'dark' : 'light';
+                this.applyTheme(systemTheme);
+            });
+        }
+    }
+}
+
+// Initialize theme manager
+const themeManager = new ThemeManager();
+
+/**
  * Main Application
  */
 
