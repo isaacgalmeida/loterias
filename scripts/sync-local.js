@@ -203,8 +203,18 @@ async function main() {
 
     if (totalNewDraws > 0) {
       console.log('\n✅ Sincronização concluída com sucesso!');
+
+      // Para GitHub Actions - sinaliza que houve mudanças
+      if (process.env.GITHUB_ACTIONS) {
+        console.log('::notice title=Sync Success::Novos concursos sincronizados com sucesso');
+      }
     } else {
       console.log('\n✅ Todos os dados já estão atualizados!');
+
+      // Para GitHub Actions - sinaliza que não houve mudanças  
+      if (process.env.GITHUB_ACTIONS) {
+        console.log('::notice title=No Changes::Todos os dados já estão atualizados');
+      }
     }
 
   } catch (error) {

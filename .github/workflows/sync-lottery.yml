@@ -1,0 +1,91 @@
+name: 🎰 Sync Lottery Data
+
+on:
+  schedule:
+    # Executa diariamente às 06:00 UTC (03:00 Brasília)
+    - cron: "0 6 * * *"
+
+  # Permite execução manual
+  workflow_dispatch:
+
+jobs:
+  sync-lottery-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: 🎯 Run lottery sync
+        run: node scripts/sync-local.js
+
+      - name: 📊 Check for changes
+        id: verify-changed-files
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "📈 Novos dados encontrados!"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "✅ Dados já estão atualizados"
+          fi
+
+      - name: 💾 Commit and push changes
+        if: steps.verify-changed-files.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action Bot"
+          git add public/data/*.json
+
+          # Cria mensagem de commit com estatísticas
+          LOTOFACIL_COUNT=$(jq '.metadata.totalDraws' public/data/lotofacil.json)
+          MEGASENA_COUNT=$(jq '.metadata.totalDraws' public/data/megasena.json)
+
+          git commit -m "🎰 Auto-sync lottery data
+
+          📊 Lotofácil: ${LOTOFACIL_COUNT} concursos
+          🎯 Mega-Sena: ${MEGASENA_COUNT} concursos
+          🕐 Sync: $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+
+          [skip ci]"
+
+          git push
+
+      - name: 📋 Create summary
+        run: |
+          echo "## 🎰 Lottery Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.verify-changed-files.outputs.changed }}" == "true" ]; then
+            echo "✅ **Status**: Novos dados sincronizados com sucesso!" >> $GITHUB_STEP_SUMMARY
+            
+            LOTOFACIL_COUNT=$(jq '.metadata.totalDraws' public/data/lotofacil.json)
+            MEGASENA_COUNT=$(jq '.metadata.totalDraws' public/data/megasena.json)
+            LAST_UPDATE=$(jq -r '.metadata.lastUpdate' public/data/lotofacil.json)
+            
+            echo "📊 **Lotofácil**: ${LOTOFACIL_COUNT} concursos" >> $GITHUB_STEP_SUMMARY
+            echo "🎯 **Mega-Sena**: ${MEGASENA_COUNT} concursos" >> $GITHUB_STEP_SUMMARY
+            echo "🕐 **Última atualização**: ${LAST_UPDATE}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "🚀 **Deploy**: Vercel fará deploy automático dos novos dados" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ **Status**: Todos os dados já estão atualizados" >> $GITHUB_STEP_SUMMARY
+            echo "🎯 Nenhuma ação necessária" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Links úteis**:" >> $GITHUB_STEP_SUMMARY
+          echo "- [📊 Status da aplicação](https://loterias.guiadainternet.com/status.html)" >> $GITHUB_STEP_SUMMARY
+          echo "- [🎰 Aplicação principal](https://loterias.guiadainternet.com)" >> $GITHUB_STEP_SUMMARY
