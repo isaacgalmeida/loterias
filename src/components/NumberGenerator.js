@@ -6,8 +6,9 @@
 /**
  * Render number generator interface
  * @param {Function} onGenerate - Callback when generate button is clicked
+ * @param {Object} currentGame - Current game configuration
  */
-export function renderNumberGenerator(onGenerate) {
+export function renderNumberGenerator(onGenerate, currentGame) {
   const container = document.getElementById('number-generator');
   if (!container) return;
 
@@ -24,6 +25,13 @@ export function renderNumberGenerator(onGenerate) {
             value="5"
             class="form-input"
           />
+        </div>
+
+        <div class="form-group">
+          <label for="numbers-per-game">Números por jogo</label>
+          <select id="numbers-per-game" class="form-select">
+            <!-- Options will be populated by JavaScript based on current game -->
+          </select>
         </div>
         
         <div class="form-group">
@@ -58,6 +66,9 @@ export function renderNumberGenerator(onGenerate) {
     </div>
   `;
 
+  // Populate numbers per game options based on current game
+  populateNumbersPerGame(currentGame);
+
   // Add styles
   addGeneratorStyles();
 
@@ -65,6 +76,7 @@ export function renderNumberGenerator(onGenerate) {
   const generateBtn = document.getElementById('generate-btn');
   const strategySelect = document.getElementById('strategy');
   const gameCountInput = document.getElementById('game-count');
+  const numbersPerGameSelect = document.getElementById('numbers-per-game');
 
   // Update strategy description
   strategySelect.addEventListener('change', updateStrategyDescription);
@@ -73,6 +85,7 @@ export function renderNumberGenerator(onGenerate) {
   generateBtn.addEventListener('click', () => {
     const count = parseInt(gameCountInput.value);
     const strategy = strategySelect.value;
+    const numbersPerGame = parseInt(numbersPerGameSelect.value);
 
     if (count < 1 || count > 100) {
       alert('Por favor, escolha entre 1 e 100 jogos.');
@@ -88,7 +101,7 @@ export function renderNumberGenerator(onGenerate) {
 
     // Call callback with slight delay for UX
     setTimeout(() => {
-      onGenerate(strategy, count);
+      onGenerate(strategy, count, numbersPerGame);
 
       // Reset button
       generateBtn.disabled = false;
@@ -99,6 +112,37 @@ export function renderNumberGenerator(onGenerate) {
     }, 300);
   });
 }
+
+/**
+ * Populate numbers per game options based on current game
+ * @param {Object} currentGame - Current game configuration
+ */
+function populateNumbersPerGame(currentGame) {
+  const select = document.getElementById('numbers-per-game');
+  if (!select) return;
+
+  let options = '';
+  let minNumbers, maxNumbers, defaultNumbers;
+
+  if (currentGame.id === 'lotofacil') {
+    minNumbers = 15;
+    maxNumbers = 20;
+    defaultNumbers = 15;
+  } else if (currentGame.id === 'megasena') {
+    minNumbers = 6;
+    maxNumbers = 20;
+    defaultNumbers = 6;
+  }
+
+  for (let i = minNumbers; i <= maxNumbers; i++) {
+    const selected = i === defaultNumbers ? 'selected' : '';
+    options += `<option value="${i}" ${selected}>${i} números</option>`;
+  }
+
+  select.innerHTML = options;
+}
+
+
 
 /**
  * Update strategy description based on selection

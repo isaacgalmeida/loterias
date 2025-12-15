@@ -30,7 +30,7 @@ async function initApp() {
         // Mostra loterias suportadas
         const supportedLotteries = dataManager.getSupportedLotteries();
         console.log('🎰 Supported lotteries:', supportedLotteries.map(l => l.name).join(', '));
-        
+
         // Load data for both games
         await loadGameData();
 
@@ -79,11 +79,11 @@ async function loadGameData() {
         // Mostra estatísticas do cache
         const stats = dataManager.getAllStats();
         console.log('📈 Cache statistics:', stats);
-        
+
     } catch (error) {
         console.error('Error loading game data:', error);
         console.log('🔄 Attempting to use fallback data...');
-        
+
         // Try to create minimal mock data for testing
         try {
             appState.lotofacilDraws = generateMockLotofacilData();
@@ -91,13 +91,13 @@ async function loadGameData() {
                 appState.lotofacilDraws,
                 GAMES.LOTOFACIL
             );
-            
+
             appState.megasenaDraws = generateMockMegaSenaData();
             appState.megasenaStats = generateStatisticsReport(
                 appState.megasenaDraws,
                 GAMES.MEGASENA
             );
-            
+
             console.log('✅ Using fallback mock data');
         } catch (fallbackError) {
             console.error('Fallback also failed:', fallbackError);
@@ -144,15 +144,16 @@ function renderUI() {
     renderStatsDashboard(stats, appState.currentGame);
 
     // Render number generator
-    renderNumberGenerator(handleGenerate);
+    renderNumberGenerator(handleGenerate, appState.currentGame);
 }
 
 /**
  * Handle number generation
  * @param {string} strategy - Generation strategy
  * @param {number} count - Number of combinations to generate
+ * @param {number} numbersPerGame - Numbers per game (optional, uses default if not provided)
  */
-function handleGenerate(strategy, count) {
+function handleGenerate(strategy, count, numbersPerGame) {
     console.log(`🎲 Generating ${count} combinations using ${strategy} strategy...`);
 
     const stats = appState.currentGame.id === 'lotofacil'
@@ -160,17 +161,23 @@ function handleGenerate(strategy, count) {
         : appState.megasenaStats;
 
     try {
+        // Create modified game config with custom numbers per game
+        const gameConfig = { ...appState.currentGame };
+        if (numbersPerGame) {
+            gameConfig.numbersPerDraw = numbersPerGame;
+        }
+
         const combinations = generateMultipleCombinations(
             strategy,
             count,
-            appState.currentGame,
+            gameConfig,
             stats
         );
 
         console.log(`✅ Generated ${combinations.length} combinations`);
 
-        // Render results
-        renderResults(combinations, appState.currentGame);
+        // Render results with the same modified game config
+        renderResults(combinations, gameConfig);
     } catch (error) {
         console.error('Error generating combinations:', error);
         showError('Erro ao gerar números. Por favor, tente novamente.');
@@ -192,7 +199,7 @@ function generateMockLotofacilData() {
             }
         }
         numbers.sort((a, b) => a - b);
-        
+
         draws.push({
             concurso: 3500 + i,
             data: `${String(i).padStart(2, '0')}/11/2024`,
@@ -217,7 +224,7 @@ function generateMockMegaSenaData() {
             }
         }
         numbers.sort((a, b) => a - b);
-        
+
         draws.push({
             concurso: 2700 + i,
             data: `${String(i).padStart(2, '0')}/11/2024`,

@@ -42,7 +42,7 @@ export function renderResults(combinations, gameConfig) {
   container.innerHTML = `
     <div class="results-header">
       <div class="results-info">
-        <p><strong>${combinations.length}</strong> ${combinations.length === 1 ? 'jogo gerado' : 'jogos gerados'} usando <strong>${strategyName}</strong></p>
+        <p><strong>${combinations.length}</strong> ${combinations.length === 1 ? 'jogo gerado' : 'jogos gerados'} de <strong>${gameConfig.numbersPerDraw} números</strong> usando <strong>${strategyName}</strong></p>
       </div>
       <div class="results-actions">
         <button id="export-txt-btn" class="btn-secondary">
