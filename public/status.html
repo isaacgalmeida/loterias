@@ -358,20 +358,25 @@
         try {
           // Tenta primeiro a API de status simples
           const response = await fetch("/api/simple-status");
-          const data = await response.json();
 
-          if (data.success) {
-            updateStatusDisplay(data);
-          } else {
-            console.error("API Error:", data);
-            // Fallback: tenta carregar dados diretamente
-            await loadDataDirectly();
+          if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+              updateStatusDisplay(data);
+              return;
+            }
           }
+
+          console.log("API not available, loading data directly...");
         } catch (error) {
-          console.error("Connection Error:", error);
-          // Fallback: tenta carregar dados diretamente
-          await loadDataDirectly();
+          console.log(
+            "API connection failed, loading data directly...",
+            error.message
+          );
         }
+
+        // Fallback: tenta carregar dados diretamente
+        await loadDataDirectly();
       }
 
       async function loadDataDirectly() {

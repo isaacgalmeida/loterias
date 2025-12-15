@@ -12,7 +12,9 @@ export default async function handler(req, res) {
     }
 
     try {
-        const baseUrl = req.headers.host ? `https://${req.headers.host}` : 'https://loterias.guiadainternet.com';
+        // For local development, use the correct protocol
+        const protocol = req.headers.host?.includes('localhost') ? 'http' : 'https';
+        const baseUrl = req.headers.host ? `${protocol}://${req.headers.host}` : 'https://loterias.guiadainternet.com';
         const lotteries = ['lotofacil', 'megasena'];
         const status = {};
         let totalDraws = 0;
@@ -21,19 +23,22 @@ export default async function handler(req, res) {
             try {
                 const dataUrl = `${baseUrl}/data/${lotteryId}.json`;
                 const response = await fetch(dataUrl);
-                
+
                 if (response.ok) {
                     const data = await response.json();
                     const draws = data.draws || [];
-                    
+
                     if (draws.length > 0) {
                         const contests = draws.map(d => d.concurso);
                         const firstContest = Math.min(...contests);
                         const lastContest = Math.max(...contests);
-                        
+
+                        // Use metadata.totalDraws if available, otherwise count draws
+                        const actualTotalDraws = data.metadata?.totalDraws || draws.length;
+
                         status[lotteryId] = {
                             success: true,
-                            totalDraws: draws.length,
+                            totalDraws: actualTotalDraws,
                             firstContest,
                             lastContest,
                             lastUpdate: data.metadata?.lastUpdate,
@@ -42,8 +47,8 @@ export default async function handler(req, res) {
                                 missingCount: 0
                             }
                         };
-                        
-                        totalDraws += draws.length;
+
+                        totalDraws += actualTotalDraws;
                     } else {
                         status[lotteryId] = {
                             success: false,

@@ -139,129 +139,104 @@ export async function parseExcelFile(filePath) {
 }
 
 /**
- * Parse Lotofácil Excel data
- * @param {string} filePath - Path to Lotofácil Excel file
+ * Parse lottery data from JSON files (primary database)
+ * Os arquivos JSON servem como banco de dados principal, atualizados pelo sync-lottery.js
+ * @param {string} lotteryType - 'lotofacil' or 'megasena'
  * @returns {Promise<Array>} Array of draw objects
  */
-export async function parseLotofacilData(filePath = '/Lotofacil.xlsx') {
-  const rawData = await parseExcelFile(filePath);
+async function parseLotteryData(lotteryType) {
+  try {
+    console.log(`📂 Carregando dados de ${lotteryType} do banco JSON...`);
 
-  console.log(`Total rows in Lotofácil file: ${rawData.length} (including header)`);
+    // PRIORIDADE 1: Carregar do arquivo JSON local (banco de dados principal)
+    const jsonData = await parseLotteryDataFromFile(lotteryType);
 
-  if (rawData.length <= 1) {
-    console.error('⚠️ Arquivo Lotofácil vazio ou só contém cabeçalho!');
-    console.error('📥 Baixe os dados históricos em: https://loterias.caixa.gov.br/');
-    return [];
-  }
-
-  // Log first and last concurso numbers for verification
-  if (rawData.length > 1) {
-    console.log(`First concurso: ${rawData[1][0]}`);
-    console.log(`Last concurso: ${rawData[rawData.length - 1][0]}`);
-  }
-
-  // Skip header row and parse data
-  // Assuming format: Concurso, Data, Bola1, Bola2, ..., Bola15
-  const draws = [];
-
-  for (let i = 1; i < rawData.length; i++) {
-    const row = rawData[i];
-    if (!row || row.length === 0) continue; // Skip empty rows
-
-    // Debug first few rows
-    if (i <= 3) {
-      console.log(`Row ${i} length: ${row.length}, content:`, row.slice(0, 5));
+    if (jsonData && jsonData.length > 0) {
+      console.log(`✅ Carregados ${jsonData.length} concursos de ${lotteryType} do banco JSON`);
+      return jsonData;
     }
 
-    const draw = {
-      concurso: row[0],
-      data: row[1],
-      numeros: []
-    };
+    // PRIORIDADE 2: Se JSON estiver vazio, tenta a API como fallback
+    console.log(`⚠️ Arquivo JSON vazio, tentando API como fallback...`);
+    return await parseLotteryDataFromAPI(lotteryType);
 
-    // Extract numbers from columns 2-16 (exactly 15 numbers for Lotofácil)
-    for (let j = 2; j <= 16; j++) {
-      if (row[j] !== undefined && row[j] !== null && row[j] !== '') {
-        const num = parseInt(row[j]);
-        if (!isNaN(num) && num >= 1 && num <= 25) {
-          draw.numeros.push(num);
-        }
+  } catch (error) {
+    console.error(`Erro ao carregar dados de ${lotteryType}:`, error);
+    // PRIORIDADE 3: Último recurso - tenta a API
+    return await parseLotteryDataFromAPI(lotteryType);
+  }
+}
+
+/**
+ * Parse lottery data from API (fallback only)
+ * @param {string} lotteryType - 'lotofacil' or 'megasena'
+ * @returns {Promise<Array>} Array of draw objects
+ */
+async function parseLotteryDataFromAPI(lotteryType) {
+  try {
+    console.log(`📡 Tentando carregar ${lotteryType} da API...`);
+
+    const apiResponse = await fetch(`/api/get-updated-data?lottery=${lotteryType}`);
+
+    if (apiResponse.ok) {
+      const apiData = await apiResponse.json();
+
+      if (apiData.success && apiData.data && apiData.data.draws) {
+        console.log(`✅ Carregados ${apiData.data.draws.length} concursos de ${lotteryType} da API`);
+        return apiData.data.draws;
       }
     }
 
-    // Only add if we have exactly 15 numbers
-    if (draw.numeros.length === 15) {
-      draws.push(draw);
-    } else if (i <= 3) {
-      console.log(`Row ${i} has ${draw.numeros.length} numbers (expected 15), numbers:`, draw.numeros);
-    }
-  }
+    console.warn(`⚠️ API falhou para ${lotteryType}`);
+    return [];
 
-  console.log(`Loaded ${draws.length} Lotofácil draws`);
-  return draws;
+  } catch (error) {
+    console.error(`Erro na API para ${lotteryType}:`, error);
+    return [];
+  }
+}
+
+/**
+ * Parse lottery data from local JSON file (fallback)
+ * @param {string} lotteryType - 'lotofacil' or 'megasena'
+ * @returns {Promise<Array>} Array of draw objects
+ */
+async function parseLotteryDataFromFile(lotteryType) {
+  try {
+    const response = await fetch(`/data/${lotteryType}.json`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const draws = data.draws || [];
+
+    console.log(`📁 Loaded ${draws.length} ${lotteryType} draws from local file`);
+    return draws;
+
+  } catch (error) {
+    console.error(`Error loading ${lotteryType} from file:`, error);
+    return [];
+  }
+}
+
+/**
+ * Parse Lotofácil Excel data
+ * @param {string} filePath - Path to Lotofácil Excel file (deprecated, now uses API)
+ * @returns {Promise<Array>} Array of draw objects
+ */
+export async function parseLotofacilData() {
+  return parseLotteryData('lotofacil');
 }
 
 /**
  * Parse Mega-Sena Excel data
- * @param {string} filePath - Path to Mega-Sena Excel file
+ * @param {string} filePath - Path to Mega-Sena Excel file (deprecated, now uses API)
  * @returns {Promise<Array>} Array of draw objects
  */
 export async function parseMegaSenaData(filePath = '/Mega-Sena.xlsx') {
-  const rawData = await parseExcelFile(filePath);
-
-  console.log(`Total rows in Mega-Sena file: ${rawData.length} (including header)`);
-
-  if (rawData.length <= 1) {
-    console.error('⚠️ Arquivo Mega-Sena vazio ou só contém cabeçalho!');
-    console.error('📥 Baixe os dados históricos em: https://loterias.caixa.gov.br/');
-    return [];
-  }
-
-  // Log first and last concurso numbers for verification
-  if (rawData.length > 1) {
-    console.log(`First concurso: ${rawData[1][0]}`);
-    console.log(`Last concurso: ${rawData[rawData.length - 1][0]}`);
-  }
-
-  // Skip header row and parse data
-  // Assuming format: Concurso, Data, Bola1, Bola2, ..., Bola6
-  const draws = [];
-
-  for (let i = 1; i < rawData.length; i++) {
-    const row = rawData[i];
-    if (!row || row.length === 0) continue; // Skip empty rows
-
-    // Debug first few rows
-    if (i <= 3) {
-      console.log(`Row ${i} length: ${row.length}, content:`, row.slice(0, 5));
-    }
-
-    const draw = {
-      concurso: row[0],
-      data: row[1],
-      numeros: []
-    };
-
-    // Extract numbers from columns 2-7 (exactly 6 numbers for Mega-Sena)
-    for (let j = 2; j <= 7; j++) {
-      if (row[j] !== undefined && row[j] !== null && row[j] !== '') {
-        const num = parseInt(row[j]);
-        if (!isNaN(num) && num >= 1 && num <= 60) {
-          draw.numeros.push(num);
-        }
-      }
-    }
-
-    // Only add if we have exactly 6 numbers
-    if (draw.numeros.length === 6) {
-      draws.push(draw);
-    } else if (i <= 3) {
-      console.log(`Row ${i} has ${draw.numeros.length} numbers (expected 6), numbers:`, draw.numeros);
-    }
-  }
-
-  console.log(`Loaded ${draws.length} Mega-Sena draws`);
-  return draws;
+  return parseLotteryData('megasena');
 }
 
 /**

@@ -16,16 +16,16 @@ export default async function handler(req, res) {
     }
 
     const startTime = Date.now();
-    
+
     try {
         console.log('🚀 Iniciando sincronização automática das loterias...');
-        
+
         // Log da requisição
         console.log(`📊 Sincronização iniciada em: ${new Date().toISOString()}`);
-        
+
         const results = {};
         const errors = {};
-        
+
         // Configurações das loterias
         const lotteryConfigs = {
             lotofacil: {
@@ -41,18 +41,21 @@ export default async function handler(req, res) {
                 maxNumber: 60
             }
         };
-        
+
         const fs = await import('fs/promises');
         const path = await import('path');
-        
+
+        // Para Vercel, não podemos escrever arquivos diretamente
+        // Vamos usar uma abordagem diferente para persistir os dados
+
         // Sincroniza cada loteria individualmente
         for (const [lotteryId, config] of Object.entries(lotteryConfigs)) {
             try {
                 console.log(`🎰 Sincronizando ${lotteryId}...`);
-                
+
                 // Carrega dados atuais do arquivo
                 const filePath = path.join(process.cwd(), 'public', 'data', `${lotteryId}.json`);
-                
+
                 let existingDraws = [];
                 try {
                     const fileContent = await fs.readFile(filePath, 'utf8');
@@ -61,43 +64,43 @@ export default async function handler(req, res) {
                 } catch (fileError) {
                     console.log(`📁 Arquivo ${lotteryId}.json não encontrado, criando novo...`);
                 }
-                
+
                 // Verifica último concurso local
-                const lastLocal = existingDraws.length > 0 
+                const lastLocal = existingDraws.length > 0
                     ? Math.max(...existingDraws.map(d => d.concurso))
                     : 0;
-                
+
                 // Verifica último concurso na API
                 const apiResponse = await fetch(config.apiUrl);
                 const latestAPIData = await apiResponse.json();
                 const latestAPI = latestAPIData.numero;
-                
+
                 console.log(`📊 ${lotteryId}: Local=${lastLocal}, API=${latestAPI}`);
-                
+
                 if (latestAPI > lastLocal) {
                     // Há novos concursos para baixar
                     const newContests = [];
                     for (let i = lastLocal + 1; i <= latestAPI; i++) {
                         newContests.push(i);
                     }
-                    
+
                     console.log(`📥 Baixando ${newContests.length} novos concursos de ${lotteryId}...`);
-                    
+
                     // Baixa novos concursos com delay para evitar rate limit
                     const newDraws = [];
                     for (const contestNumber of newContests) {
                         try {
                             const contestResponse = await fetch(`${config.apiUrl}/${contestNumber}`);
                             const apiData = await contestResponse.json();
-                            
+
                             // Transforma dados da API
                             const numbers = apiData.listaDezenas || apiData.dezenasSorteadasOrdemSorteio || [];
-                            
+
                             if (Array.isArray(numbers) && numbers.length >= config.numbersCount) {
                                 const validNumbers = numbers.slice(0, config.numbersCount)
                                     .map(num => parseInt(num))
                                     .filter(num => !isNaN(num) && num >= config.minNumber && num <= config.maxNumber);
-                                
+
                                 if (validNumbers.length === config.numbersCount) {
                                     const transformed = {
                                         concurso: apiData.numero,
@@ -107,11 +110,11 @@ export default async function handler(req, res) {
                                         valorEstimadoProximoConcurso: apiData.valorEstimadoProximoConcurso || 0,
                                         dataProximoConcurso: apiData.dataProximoConcurso || null
                                     };
-                                    
+
                                     newDraws.push(transformed);
                                 }
                             }
-                            
+
                             // Delay entre requisições
                             if (newContests.length > 1) {
                                 await new Promise(resolve => setTimeout(resolve, 1000));
@@ -120,11 +123,11 @@ export default async function handler(req, res) {
                             console.warn(`⚠️ Falha no concurso ${contestNumber}: ${error.message}`);
                         }
                     }
-                    
+
                     if (newDraws.length > 0) {
                         // Combina com dados existentes
                         const allDraws = [...existingDraws, ...newDraws].sort((a, b) => a.concurso - b.concurso);
-                        
+
                         // Salva arquivo atualizado
                         const updatedData = {
                             metadata: {
@@ -135,16 +138,16 @@ export default async function handler(req, res) {
                             },
                             draws: allDraws
                         };
-                        
+
                         await fs.writeFile(filePath, JSON.stringify(updatedData, null, 2), 'utf8');
-                        
+
                         results[lotteryId] = {
                             success: true,
                             totalDraws: allDraws.length,
                             newDraws: newDraws.length,
                             lastContest: Math.max(...allDraws.map(d => d.concurso))
                         };
-                        
+
                         console.log(`✅ ${lotteryId}: +${newDraws.length} novos concursos`);
                     } else {
                         results[lotteryId] = {
@@ -162,10 +165,10 @@ export default async function handler(req, res) {
                         newDraws: 0,
                         message: 'Já está atualizado'
                     };
-                    
+
                     console.log(`✅ ${lotteryId}: Já está atualizado`);
                 }
-                
+
             } catch (error) {
                 console.error(`❌ Erro ao sincronizar ${lotteryId}:`, error);
                 errors[lotteryId] = error.message;
@@ -175,10 +178,10 @@ export default async function handler(req, res) {
                 };
             }
         }
-        
+
         const endTime = Date.now();
         const duration = ((endTime - startTime) / 1000).toFixed(2);
-        
+
         // Resposta de sucesso
         const response = {
             success: true,
@@ -192,17 +195,17 @@ export default async function handler(req, res) {
                 lotteriesWithErrors: Object.keys(errors).length
             }
         };
-        
+
         console.log('✅ Sincronização concluída:', response.summary);
-        
+
         return res.status(200).json(response);
-        
+
     } catch (error) {
         console.error('❌ Erro fatal na sincronização:', error);
-        
+
         const endTime = Date.now();
         const duration = ((endTime - startTime) / 1000).toFixed(2);
-        
+
         return res.status(500).json({
             success: false,
             timestamp: new Date().toISOString(),
