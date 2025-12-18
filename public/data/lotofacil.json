@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "lastUpdate": "2025-12-17T15:44:58.514Z",
-    "totalDraws": 3564,
+    "lastUpdate": "2025-12-18T06:25:40.495Z",
+    "totalDraws": 3565,
     "lotteryType": "lotofacil",
     "version": "1.0",
     "syncSource": "local-script"
@@ -85542,6 +85542,30 @@
       "acumulado": true,
       "valorEstimadoProximoConcurso": 5000000,
       "dataProximoConcurso": "17/12/2025"
+    },
+    {
+      "concurso": 3565,
+      "data": "17/12/2025",
+      "numeros": [
+        1,
+        4,
+        10,
+        11,
+        13,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25
+      ],
+      "acumulado": false,
+      "valorEstimadoProximoConcurso": 1800000,
+      "dataProximoConcurso": "18/12/2025"
     }
   ]
 }
