@@ -1,7 +1,11 @@
 {
-  "name": "analise-jogos-loterias",
+  "name": "estatisticas-jogos-loteria",
   "version": "1.0.0",
   "type": "module",
+  "description": "Sistema completo de análise estatística para Lotofácil e Mega-Sena com dados históricos",
+  "keywords": ["loteria", "estatisticas", "lotofacil", "mega-sena", "analise", "dados"],
+  "author": "Estatísticas de Jogos da Loteria",
+  "license": "ISC",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -14,10 +18,6 @@
     "vercel:dev": "vercel dev",
     "vercel:deploy": "vercel --prod"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "Sistema de análise estatística para Lotofácil e Mega-Sena",
   "engines": {
     "node": ">=18.0.0"
   },

@@ -27,11 +27,11 @@ class ThemeManager {
     }
 
     getStoredTheme() {
-        return localStorage.getItem('lottery-theme');
+        return localStorage.getItem('estatisticas-loteria-theme');
     }
 
     storeTheme(theme) {
-        localStorage.setItem('lottery-theme', theme);
+        localStorage.setItem('estatisticas-loteria-theme', theme);
     }
 
     applyTheme(theme) {
@@ -116,7 +116,7 @@ const appState = {
  */
 async function initApp() {
     try {
-        console.log('🚀 Initializing Lottery Analysis System...');
+        console.log('🚀 Initializing Statistics System...');
         console.log('💾 Using intelligent cache system with API sync');
 
         // Mostra loterias suportadas
@@ -147,7 +147,7 @@ async function initApp() {
  * Load game data using cache system with API sync
  */
 async function loadGameData() {
-    console.log('📊 Loading lottery data using cache system...');
+    console.log('📊 Loading lottery statistics data using cache system...');
 
     try {
         // Carrega dados da Lotofácil (cache + sync automático)
@@ -225,6 +225,24 @@ function setupGameSelector() {
 }
 
 /**
+ * Get latest draw results for display
+ */
+function getLatestDrawResults() {
+    const lotofacilLatest = appState.lotofacilDraws.length > 0 
+        ? appState.lotofacilDraws[appState.lotofacilDraws.length - 1]
+        : null;
+    
+    const megasenaLatest = appState.megasenaDraws.length > 0 
+        ? appState.megasenaDraws[appState.megasenaDraws.length - 1]
+        : null;
+
+    return {
+        lotofacil: lotofacilLatest,
+        megasena: megasenaLatest
+    };
+}
+
+/**
  * Render UI for current game
  */
 function renderUI() {
@@ -237,6 +255,101 @@ function renderUI() {
 
     // Render number generator
     renderNumberGenerator(handleGenerate, appState.currentGame);
+
+    // Render latest results below game selector
+    renderLatestResults();
+}
+
+/**
+ * Render latest results section
+ */
+function renderLatestResults() {
+    const latestResults = getLatestDrawResults();
+    
+    // Find or create the latest results container
+    let latestResultsContainer = document.getElementById('latest-results-section');
+    
+    if (!latestResultsContainer) {
+        // Create the container and insert it after the game selector
+        latestResultsContainer = document.createElement('section');
+        latestResultsContainer.id = 'latest-results-section';
+        latestResultsContainer.className = 'latest-results-section';
+        
+        const gameSelector = document.querySelector('.game-selector-section');
+        gameSelector.parentNode.insertBefore(latestResultsContainer, gameSelector.nextSibling);
+    }
+
+    // Generate HTML for latest results
+    const lotofacilHtml = latestResults.lotofacil ? `
+        <div class="latest-result-card">
+            <div class="result-header">
+                <span class="result-icon">🍀</span>
+                <div class="result-info">
+                    <h3>Lotofácil</h3>
+                    <p>Concurso ${latestResults.lotofacil.concurso} - ${latestResults.lotofacil.data}</p>
+                </div>
+            </div>
+            <div class="result-numbers">
+                ${latestResults.lotofacil.numeros.map(num => 
+                    `<span class="number-ball lotofacil-ball">${String(num).padStart(2, '0')}</span>`
+                ).join('')}
+            </div>
+        </div>
+    ` : `
+        <div class="latest-result-card">
+            <div class="result-header">
+                <span class="result-icon">🍀</span>
+                <div class="result-info">
+                    <h3>Lotofácil</h3>
+                    <p>Carregando dados...</p>
+                </div>
+            </div>
+            <div class="result-loading">
+                <div class="spinner-small"></div>
+            </div>
+        </div>
+    `;
+
+    const megasenaHtml = latestResults.megasena ? `
+        <div class="latest-result-card">
+            <div class="result-header">
+                <span class="result-icon">💎</span>
+                <div class="result-info">
+                    <h3>Mega-Sena</h3>
+                    <p>Concurso ${latestResults.megasena.concurso} - ${latestResults.megasena.data}</p>
+                </div>
+            </div>
+            <div class="result-numbers">
+                ${latestResults.megasena.numeros.map(num => 
+                    `<span class="number-ball megasena-ball">${String(num).padStart(2, '0')}</span>`
+                ).join('')}
+            </div>
+        </div>
+    ` : `
+        <div class="latest-result-card">
+            <div class="result-header">
+                <span class="result-icon">💎</span>
+                <div class="result-info">
+                    <h3>Mega-Sena</h3>
+                    <p>Carregando dados...</p>
+                </div>
+            </div>
+            <div class="result-loading">
+                <div class="spinner-small"></div>
+            </div>
+        </div>
+    `;
+
+    latestResultsContainer.innerHTML = `
+        <h2 class="section-title">🎯 Últimos Resultados</h2>
+        <div class="latest-results-grid">
+            ${lotofacilHtml}
+            ${megasenaHtml}
+        </div>
+        <p class="latest-results-note">
+            Dados atualizados automaticamente via sistema de cache inteligente
+        </p>
+    `;
 }
 
 /**

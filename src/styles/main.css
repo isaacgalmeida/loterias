@@ -933,3 +933,172 @@ section {
     transition: none !important;
   }
 }
+
+/* Latest Results Section */
+.latest-results-section {
+  margin: var(--spacing-xl) 0;
+}
+
+.latest-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+}
+
+.latest-result-card {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.3s ease;
+}
+
+.latest-result-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-hover);
+}
+
+.result-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.result-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.result-info h3 {
+  margin: 0;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.result-info p {
+  margin: 0.25rem 0 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.result-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.number-ball {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease;
+}
+
+.number-ball:hover {
+  transform: scale(1.1);
+}
+
+.lotofacil-ball {
+  background: linear-gradient(135deg, var(--color-lotofacil-green) 0%, #1a7c5a 100%);
+}
+
+.megasena-ball {
+  background: linear-gradient(135deg, var(--color-megasena-purple) 0%, #553285 100%);
+}
+
+/* Responsive adjustments for latest results */
+@media (max-width: 768px) {
+  .latest-results-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-md);
+  }
+  
+  .result-numbers {
+    gap: 0.375rem;
+  }
+  
+  .number-ball {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .result-header {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--spacing-sm);
+  }
+  
+  .result-icon {
+    font-size: 1.5rem;
+  }
+  
+  .number-ball {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.7rem;
+  }
+}
+/* Loading states for latest results */
+.result-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: var(--spacing-lg) 0;
+}
+
+.spinner-small {
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--color-border);
+  border-top: 2px solid var(--color-caixa-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.latest-results-note {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-top: var(--spacing-lg);
+  font-style: italic;
+}
+
+/* Dark theme adjustments for latest results */
+[data-theme="dark"] .latest-result-card {
+  background: var(--color-card-bg);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .result-info h3 {
+  color: var(--color-text-primary);
+}
+
+[data-theme="dark"] .result-info p {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .latest-results-note {
+  color: var(--color-text-secondary);
+}
+
+[data-theme="dark"] .spinner-small {
+  border-color: var(--color-border);
+  border-top-color: var(--color-caixa-blue);
+}
