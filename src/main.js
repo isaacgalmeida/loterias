@@ -471,3 +471,89 @@ if (document.readyState === 'loading') {
 } else {
     initApp();
 }
+/**
+ * Back to Top Button Functionality
+ */
+class BackToTopButton {
+    constructor() {
+        this.button = document.getElementById('back-to-top');
+        this.scrollThreshold = 300; // Show button after scrolling 300px
+        this.init();
+    }
+
+    init() {
+        if (!this.button) return;
+
+        // Add click event listener
+        this.button.addEventListener('click', () => this.scrollToTop());
+
+        // Add scroll event listener with throttling
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            scrollTimeout = setTimeout(() => this.handleScroll(), 10);
+        });
+
+        // Add keyboard support
+        this.button.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.scrollToTop();
+            }
+        });
+    }
+
+    handleScroll() {
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        if (scrollTop > this.scrollThreshold) {
+            this.showButton();
+        } else {
+            this.hideButton();
+        }
+    }
+
+    showButton() {
+        this.button.classList.add('visible');
+        this.button.setAttribute('aria-hidden', 'false');
+    }
+
+    hideButton() {
+        this.button.classList.remove('visible');
+        this.button.setAttribute('aria-hidden', 'true');
+    }
+
+    scrollToTop() {
+        // Smooth scroll to top
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+        // Add a subtle animation feedback
+        this.button.style.transform = 'translateY(0) scale(0.9)';
+        setTimeout(() => {
+            this.button.style.transform = '';
+        }, 150);
+
+        // Focus management for accessibility
+        setTimeout(() => {
+            // Focus the main heading after scrolling
+            const mainHeading = document.querySelector('h1');
+            if (mainHeading) {
+                mainHeading.focus();
+            }
+        }, 500);
+    }
+}
+
+// Initialize back to top button when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        new BackToTopButton();
+    });
+} else {
+    new BackToTopButton();
+}

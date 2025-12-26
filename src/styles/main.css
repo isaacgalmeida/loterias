@@ -1102,3 +1102,79 @@ section {
   border-color: var(--color-border);
   border-top-color: var(--color-caixa-blue);
 }
+/* Back to Top Button */
+.back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3rem;
+  height: 3rem;
+  background: var(--gradient-caixa);
+  color: white;
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  font-size: 1.25rem;
+  font-weight: bold;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  z-index: 1000;
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 25px rgba(0, 102, 179, 0.3);
+}
+
+.back-to-top:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.back-to-top span {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.back-to-top:hover span {
+  transform: translateY(-2px);
+}
+
+/* Dark theme adjustments for back to top button */
+[data-theme="dark"] .back-to-top {
+  background: var(--gradient-caixa);
+  box-shadow: 0 4px 15px rgba(0, 102, 179, 0.4);
+}
+
+[data-theme="dark"] .back-to-top:hover {
+  box-shadow: 0 8px 25px rgba(0, 102, 179, 0.5);
+}
+
+/* Responsive adjustments for back to top button */
+@media (max-width: 768px) {
+  .back-to-top {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .back-to-top {
+    bottom: 1rem;
+    right: 1rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+  }
+}
