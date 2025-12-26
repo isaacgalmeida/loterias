@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "lastUpdate": "2025-12-19T06:25:07.901Z",
-    "totalDraws": 2953,
+    "lastUpdate": "2025-12-22T06:27:44.596Z",
+    "totalDraws": 2954,
     "lotteryType": "megasena",
     "version": "1.0",
     "syncSource": "local-script"
@@ -44301,6 +44301,21 @@
       "acumulado": true,
       "valorEstimadoProximoConcurso": 62000000,
       "dataProximoConcurso": "20/12/2025"
+    },
+    {
+      "concurso": 2954,
+      "data": "20/12/2025",
+      "numeros": [
+        1,
+        9,
+        37,
+        39,
+        42,
+        44
+      ],
+      "acumulado": true,
+      "valorEstimadoProximoConcurso": 1000000000,
+      "dataProximoConcurso": "31/12/2025"
     }
   ]
 }

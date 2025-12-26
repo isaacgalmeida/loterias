@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "lastUpdate": "2025-12-19T06:25:07.331Z",
-    "totalDraws": 3566,
+    "lastUpdate": "2025-12-25T06:25:56.730Z",
+    "totalDraws": 3571,
     "lotteryType": "lotofacil",
     "version": "1.0",
     "syncSource": "local-script"
@@ -85590,6 +85590,126 @@
       "acumulado": true,
       "valorEstimadoProximoConcurso": 5000000,
       "dataProximoConcurso": "19/12/2025"
+    },
+    {
+      "concurso": 3567,
+      "data": "19/12/2025",
+      "numeros": [
+        1,
+        2,
+        4,
+        8,
+        9,
+        10,
+        11,
+        12,
+        14,
+        15,
+        18,
+        19,
+        20,
+        24,
+        25
+      ],
+      "acumulado": false,
+      "valorEstimadoProximoConcurso": 1800000,
+      "dataProximoConcurso": "20/12/2025"
+    },
+    {
+      "concurso": 3568,
+      "data": "20/12/2025",
+      "numeros": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        13,
+        18,
+        19,
+        20,
+        22,
+        24
+      ],
+      "acumulado": false,
+      "valorEstimadoProximoConcurso": 1800000,
+      "dataProximoConcurso": "22/12/2025"
+    },
+    {
+      "concurso": 3569,
+      "data": "22/12/2025",
+      "numeros": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        8,
+        10,
+        14,
+        15,
+        17,
+        18,
+        19,
+        20,
+        24
+      ],
+      "acumulado": false,
+      "valorEstimadoProximoConcurso": 7000000,
+      "dataProximoConcurso": "23/12/2025"
+    },
+    {
+      "concurso": 3570,
+      "data": "23/12/2025",
+      "numeros": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        10,
+        11,
+        13,
+        15,
+        18,
+        19,
+        20,
+        21,
+        22,
+        24
+      ],
+      "acumulado": false,
+      "valorEstimadoProximoConcurso": 1800000,
+      "dataProximoConcurso": "24/12/2025"
+    },
+    {
+      "concurso": 3571,
+      "data": "24/12/2025",
+      "numeros": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        8,
+        11,
+        12,
+        13,
+        14,
+        17,
+        20,
+        22,
+        24,
+        25
+      ],
+      "acumulado": false,
+      "valorEstimadoProximoConcurso": 1800000,
+      "dataProximoConcurso": "26/12/2025"
     }
   ]
 }
