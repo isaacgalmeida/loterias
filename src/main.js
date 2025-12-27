@@ -5,6 +5,7 @@ import { generateMultipleCombinations } from './services/predictionEngine.js';
 import { renderStatsDashboard } from './components/StatsDashboard.js';
 import { renderNumberGenerator } from './components/NumberGenerator.js';
 import { renderResults } from './components/ResultsDisplay.js';
+import { renderHistoryChecker } from './components/HistoryChecker.js';
 
 /**
  * Theme Management System
@@ -228,11 +229,11 @@ function setupGameSelector() {
  * Get latest draw results for display
  */
 function getLatestDrawResults() {
-    const lotofacilLatest = appState.lotofacilDraws.length > 0 
+    const lotofacilLatest = appState.lotofacilDraws.length > 0
         ? appState.lotofacilDraws[appState.lotofacilDraws.length - 1]
         : null;
-    
-    const megasenaLatest = appState.megasenaDraws.length > 0 
+
+    const megasenaLatest = appState.megasenaDraws.length > 0
         ? appState.megasenaDraws[appState.megasenaDraws.length - 1]
         : null;
 
@@ -250,6 +251,10 @@ function renderUI() {
         ? appState.lotofacilStats
         : appState.megasenaStats;
 
+    const draws = appState.currentGame.id === 'lotofacil'
+        ? appState.lotofacilDraws
+        : appState.megasenaDraws;
+
     // Render statistics dashboard
     renderStatsDashboard(stats, appState.currentGame);
 
@@ -258,6 +263,9 @@ function renderUI() {
 
     // Render latest results below game selector
     renderLatestResults();
+
+    // Render history checker
+    renderHistoryCheckerSection(draws);
 }
 
 /**
@@ -265,16 +273,16 @@ function renderUI() {
  */
 function renderLatestResults() {
     const latestResults = getLatestDrawResults();
-    
+
     // Find or create the latest results container
     let latestResultsContainer = document.getElementById('latest-results-section');
-    
+
     if (!latestResultsContainer) {
         // Create the container and insert it after the game selector
         latestResultsContainer = document.createElement('section');
         latestResultsContainer.id = 'latest-results-section';
         latestResultsContainer.className = 'latest-results-section';
-        
+
         const gameSelector = document.querySelector('.game-selector-section');
         gameSelector.parentNode.insertBefore(latestResultsContainer, gameSelector.nextSibling);
     }
@@ -290,9 +298,9 @@ function renderLatestResults() {
                 </div>
             </div>
             <div class="result-numbers">
-                ${latestResults.lotofacil.numeros.map(num => 
-                    `<span class="number-ball lotofacil-ball">${String(num).padStart(2, '0')}</span>`
-                ).join('')}
+                ${latestResults.lotofacil.numeros.map(num =>
+        `<span class="number-ball lotofacil-ball">${String(num).padStart(2, '0')}</span>`
+    ).join('')}
             </div>
         </div>
     ` : `
@@ -320,9 +328,9 @@ function renderLatestResults() {
                 </div>
             </div>
             <div class="result-numbers">
-                ${latestResults.megasena.numeros.map(num => 
-                    `<span class="number-ball megasena-ball">${String(num).padStart(2, '0')}</span>`
-                ).join('')}
+                ${latestResults.megasena.numeros.map(num =>
+        `<span class="number-ball megasena-ball">${String(num).padStart(2, '0')}</span>`
+    ).join('')}
             </div>
         </div>
     ` : `
@@ -350,6 +358,27 @@ function renderLatestResults() {
             Dados atualizados automaticamente via sistema de cache inteligente
         </p>
     `;
+}
+
+/**
+ * Render history checker section
+ */
+function renderHistoryCheckerSection(draws) {
+    // Find or create the history checker container
+    let historyCheckerContainer = document.getElementById('history-checker-section');
+
+    if (!historyCheckerContainer) {
+        // Create the container and insert it after the results section
+        historyCheckerContainer = document.createElement('section');
+        historyCheckerContainer.id = 'history-checker-section';
+        historyCheckerContainer.className = 'history-checker-section';
+
+        const resultsSection = document.getElementById('results-section');
+        resultsSection.parentNode.insertBefore(historyCheckerContainer, resultsSection.nextSibling);
+    }
+
+    // Render the history checker component
+    renderHistoryChecker(historyCheckerContainer, appState.currentGame.id.toUpperCase(), draws);
 }
 
 /**
@@ -507,7 +536,7 @@ class BackToTopButton {
 
     handleScroll() {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
+
         if (scrollTop > this.scrollThreshold) {
             this.showButton();
         } else {

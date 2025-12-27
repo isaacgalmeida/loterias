@@ -260,6 +260,7 @@ Todas as estratégias (exceto Aleatório Puro) usam dados das planilhas Excel:
 - **Resultados**: `src/components/ResultsDisplay.js` - Exibição com explicações
 - **Estatísticas**: `src/services/statisticsEngine.js` - Cálculo de dados históricos
 - **Modelos**: `src/utils/dataModels.js` - Configurações dos jogos
+- **Docs**: `docs` - Toda a documentação do sistema deve ser salvo aqui.
 
 ---
 
