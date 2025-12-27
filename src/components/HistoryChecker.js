@@ -299,7 +299,7 @@ function checkCombinationInHistory(selectedNumbers, draws, resultArea, currentGa
       const minMatches = standardGameSize <= 6 ? 3 : Math.max(4, standardGameSize - 2);
       return matches.length >= minMatches &&
         !drawNumbers.every(num => selectedNumbers.includes(num));
-    }).slice(0, 5);
+    }); // Remove limite - mostra TODOS os resultados
 
   } else {
     // Para jogos padrão, busca combinações exatas
@@ -322,7 +322,7 @@ function checkCombinationInHistory(selectedNumbers, draws, resultArea, currentGa
         minMatches = Math.max(8, numbersPerGame - 2); // Para 11+ números
       }
       return matches.length >= minMatches && matches.length < numbersPerGame;
-    }).slice(0, 5);
+    }); // Remove limite - mostra TODOS os resultados
   }
 
   displayResults(selectedNumbers, exactMatches, partialMatches, resultArea, currentGame, numbersPerGame, isExtendedGame);
@@ -397,7 +397,7 @@ function displayResults(selectedNumbers, exactMatches, partialMatches, resultAre
                         <div class="partial-matches">
                             <h5>Combinações similares que já saíram:</h5>
                             <div class="similar-combinations">
-                                ${partialMatches.slice(0, 3).map(match => {
+                                ${partialMatches.map(match => {
         const matchCount = selectedNumbers.filter(num => match.numeros.includes(num)).length;
         return `
                                         <div class="similar-item">
@@ -461,7 +461,7 @@ function displayResults(selectedNumbers, exactMatches, partialMatches, resultAre
                         <div class="partial-matches">
                             <h5>Combinações similares que já saíram:</h5>
                             <div class="similar-combinations">
-                                ${partialMatches.slice(0, 3).map(match => {
+                                ${partialMatches.map(match => {
         const matchCount = selectedNumbers.filter(num => match.numeros.includes(num)).length;
         return `
                                         <div class="similar-item">
@@ -489,13 +489,82 @@ function displayResults(selectedNumbers, exactMatches, partialMatches, resultAre
   resultArea.innerHTML = html;
   resultArea.style.display = 'block';
 
+  // Adiciona event listener para o botão "mostrar mais"
+  const showMoreBtn = resultArea.querySelector('#show-more-similar');
+  if (showMoreBtn) {
+    showMoreBtn.addEventListener('click', () => {
+      const extraSection = resultArea.querySelector('#similar-extra');
+      const showMoreContainer = resultArea.querySelector('.show-more-container');
+
+      if (extraSection && showMoreContainer) {
+        extraSection.style.display = 'block';
+        showMoreContainer.style.display = 'none';
+
+        // Scroll suave para mostrar as novas combinações
+        extraSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    });
+  }
+
   // Scroll suave para o resultado
   resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 /**
- * Verifica se dois arrays são iguais
+ * Gera HTML para combinações similares com sistema de "mostrar mais"
  */
+function generateSimilarCombinationsHTML(partialMatches, selectedNumbers, currentGame, gameConfig) {
+  if (partialMatches.length === 0) return '';
+
+  const initialCount = 5;
+
+  return `
+    <div class="partial-matches">
+      <h5>Combinações similares que já saíram (${partialMatches.length} encontradas):</h5>
+      <div class="similar-combinations">
+        ${partialMatches.slice(0, initialCount).map(match => {
+    const matchCount = selectedNumbers.filter(num => match.numeros.includes(num)).length;
+    return generateSimilarItemHTML(match, matchCount, selectedNumbers, currentGame, gameConfig);
+  }).join('')}
+      </div>
+      ${partialMatches.length > initialCount ? `
+        <div class="similar-combinations-extra" id="similar-extra" style="display: none;">
+          ${partialMatches.slice(initialCount).map(match => {
+    const matchCount = selectedNumbers.filter(num => match.numeros.includes(num)).length;
+    return generateSimilarItemHTML(match, matchCount, selectedNumbers, currentGame, gameConfig);
+  }).join('')}
+        </div>
+        <div class="show-more-container">
+          <button class="btn-show-more" id="show-more-similar">
+            <span class="show-more-icon">👁️</span>
+            Mostrar mais ${partialMatches.length - initialCount} combinações similares
+          </button>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+/**
+ * Gera HTML para um item de combinação similar
+ */
+function generateSimilarItemHTML(match, matchCount, selectedNumbers, currentGame, gameConfig) {
+  return `
+    <div class="similar-item">
+      <div class="similar-header">
+        <span class="similar-contest">Concurso ${match.concurso}</span>
+        <span class="similar-matches">${matchCount}/${gameConfig.numbersPerDraw} números iguais</span>
+        <span class="similar-date">${match.data}</span>
+      </div>
+      <div class="similar-numbers">
+        ${match.numeros.map(num => {
+    const isMatch = selectedNumbers.includes(num);
+    return `<span class="number-ball ${currentGame.toLowerCase()} ${isMatch ? 'match' : 'no-match'}">${num.toString().padStart(2, '0')}</span>`;
+  }).join('')}
+      </div>
+    </div>
+  `;
+}
 function arraysEqual(arr1, arr2) {
   if (arr1.length !== arr2.length) return false;
   return arr1.every((val, index) => val === arr2[index]);
@@ -570,3 +639,4 @@ function calculateCombination(n, k) {
 function formatNumber(num) {
   return num.toLocaleString('pt-BR');
 }
+
