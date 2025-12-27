@@ -113,6 +113,9 @@ function setupHistoryChecker(container, currentGame, draws) {
   const resultArea = container.querySelector('#result-area');
   const numbersPerGameSelect = container.querySelector('#numbers-per-game-checker');
 
+  // Carrega dados salvos do localStorage
+  loadSavedSelection();
+
   // Event listener para mudança na quantidade de números
   numbersPerGameSelect.addEventListener('change', (e) => {
     currentNumbersPerGame = parseInt(e.target.value);
@@ -127,6 +130,8 @@ function setupHistoryChecker(container, currentGame, draws) {
       resultArea.style.display = 'none';
     }
 
+    // Salva a nova quantidade no localStorage
+    saveSelectionToStorage();
     updateUI();
   });
 
@@ -145,6 +150,8 @@ function setupHistoryChecker(container, currentGame, draws) {
         e.target.classList.add('selected');
       }
 
+      // Salva seleção no localStorage
+      saveSelectionToStorage();
       updateUI();
     }
   });
@@ -169,8 +176,87 @@ function setupHistoryChecker(container, currentGame, draws) {
       btn.classList.remove('selected');
     });
     resultArea.style.display = 'none';
+
+    // Remove do localStorage
+    clearStoredSelection();
     updateUI();
   });
+
+  /**
+   * Salva a seleção atual no localStorage
+   */
+  function saveSelectionToStorage() {
+    const selectionData = {
+      game: currentGame,
+      numbersPerGame: currentNumbersPerGame,
+      selectedNumbers: Array.from(selectedNumbers),
+      timestamp: Date.now()
+    };
+
+    try {
+      localStorage.setItem('history-checker-selection', JSON.stringify(selectionData));
+    } catch (error) {
+      console.warn('Erro ao salvar seleção no localStorage:', error);
+    }
+  }
+
+  /**
+   * Carrega a seleção salva do localStorage
+   */
+  function loadSavedSelection() {
+    try {
+      const savedData = localStorage.getItem('history-checker-selection');
+      if (!savedData) return;
+
+      const selectionData = JSON.parse(savedData);
+
+      // Verifica se os dados são do mesmo jogo
+      if (selectionData.game !== currentGame) return;
+
+      // Verifica se os dados não são muito antigos (24 horas)
+      const maxAge = 24 * 60 * 60 * 1000; // 24 horas em ms
+      if (Date.now() - selectionData.timestamp > maxAge) {
+        clearStoredSelection();
+        return;
+      }
+
+      // Restaura a quantidade de números
+      if (selectionData.numbersPerGame && selectionData.numbersPerGame >= gameConfig.numbersPerDraw && selectionData.numbersPerGame <= 20) {
+        currentNumbersPerGame = selectionData.numbersPerGame;
+        numbersPerGameSelect.value = currentNumbersPerGame;
+        targetCountEl.textContent = currentNumbersPerGame;
+      }
+
+      // Restaura os números selecionados
+      if (selectionData.selectedNumbers && Array.isArray(selectionData.selectedNumbers)) {
+        selectionData.selectedNumbers.forEach(number => {
+          if (number >= gameConfig.minNumber && number <= gameConfig.maxNumber) {
+            selectedNumbers.add(number);
+            const btn = container.querySelector(`[data-number="${number}"]`);
+            if (btn) {
+              btn.classList.add('selected');
+            }
+          }
+        });
+      }
+
+      updateUI();
+    } catch (error) {
+      console.warn('Erro ao carregar seleção do localStorage:', error);
+      clearStoredSelection();
+    }
+  }
+
+  /**
+   * Remove a seleção salva do localStorage
+   */
+  function clearStoredSelection() {
+    try {
+      localStorage.removeItem('history-checker-selection');
+    } catch (error) {
+      console.warn('Erro ao limpar localStorage:', error);
+    }
+  }
 
   function updateUI() {
     selectedCountEl.textContent = selectedNumbers.size;
