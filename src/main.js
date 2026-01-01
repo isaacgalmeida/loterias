@@ -348,11 +348,47 @@ function renderLatestResults() {
         </div>
     `;
 
+    // Generate HTML for winning bets links
+    const winningBetsHtml = `
+        <div class="latest-result-card winning-bets-card">
+            <div class="result-header">
+                <span class="result-icon">🏆</span>
+                <div class="result-info">
+                    <h3>Apostas Ganhadoras</h3>
+                    <p>Veja onde foram feitas as apostas vencedoras</p>
+                </div>
+            </div>
+            <div class="winning-bets-links">
+                ${latestResults.lotofacil ? `
+                    <a href="https://loterias.caixa.gov.br/Paginas/Locais-Sorte.aspx?modalidade=LOTOFACIL&concurso=${latestResults.lotofacil.concurso}&titulo=Lotof%C3%A1cil" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="winning-bet-link lotofacil-link">
+                        <span class="link-icon">🍀</span>
+                        <span class="link-text">Lotofácil ${latestResults.lotofacil.concurso}</span>
+                        <span class="external-icon">🔗</span>
+                    </a>
+                ` : ''}
+                ${latestResults.megasena ? `
+                    <a href="https://loterias.caixa.gov.br/Paginas/Locais-Sorte.aspx?modalidade=MEGA_SENA&concurso=${latestResults.megasena.concurso}&titulo=Mega-Sena" 
+                       target="_blank" 
+                       rel="noopener noreferrer" 
+                       class="winning-bet-link megasena-link">
+                        <span class="link-icon">💎</span>
+                        <span class="link-text">Mega-Sena ${latestResults.megasena.concurso}</span>
+                        <span class="external-icon">🔗</span>
+                    </a>
+                ` : ''}
+            </div>
+        </div>
+    `;
+
     latestResultsContainer.innerHTML = `
         <h2 class="section-title">🎯 Últimos Resultados</h2>
         <div class="latest-results-grid">
             ${lotofacilHtml}
             ${megasenaHtml}
+            ${winningBetsHtml}
         </div>
         <p class="latest-results-note">
             Dados atualizados automaticamente via sistema de cache inteligente

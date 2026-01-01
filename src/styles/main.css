@@ -1190,6 +1190,134 @@ section {
   border-color: var(--color-border);
   border-top-color: var(--color-caixa-blue);
 }
+
+/* Winning Bets Card Styles */
+.winning-bets-card {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 191, 36, 0.1) 0%,
+    rgba(245, 158, 11, 0.1) 100%
+  );
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.winning-bets-card:hover {
+  border-color: rgba(251, 191, 36, 0.5);
+  box-shadow: 0 8px 25px rgba(251, 191, 36, 0.15);
+}
+
+.winning-bets-links {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.winning-bet-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--color-text-primary);
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.winning-bet-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
+  color: var(--color-text-primary);
+}
+
+.winning-bet-link .link-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.winning-bet-link .link-text {
+  flex: 1;
+  font-size: var(--font-size-sm);
+}
+
+.winning-bet-link .external-icon {
+  font-size: 0.875rem;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.winning-bet-link:hover .external-icon {
+  opacity: 1;
+}
+
+.lotofacil-link:hover {
+  border-color: rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
+}
+
+.megasena-link:hover {
+  border-color: rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+}
+
+/* Dark theme adjustments for winning bets */
+[data-theme="dark"] .winning-bets-card {
+  background: linear-gradient(
+    135deg,
+    rgba(251, 191, 36, 0.15) 0%,
+    rgba(245, 158, 11, 0.15) 100%
+  );
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+[data-theme="dark"] .winning-bets-card:hover {
+  border-color: rgba(251, 191, 36, 0.6);
+}
+
+[data-theme="dark"] .winning-bet-link {
+  background: rgba(0, 0, 0, 0.2);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .winning-bet-link:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Mobile responsiveness for winning bets */
+@media (max-width: 768px) {
+  .latest-results-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .winning-bets-links {
+    gap: var(--spacing-sm);
+  }
+
+  .winning-bet-link {
+    padding: var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+
+  .winning-bet-link .link-text {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 480px) {
+  .winning-bet-link .link-icon {
+    font-size: 1rem;
+  }
+
+  .winning-bet-link .external-icon {
+    font-size: 0.75rem;
+  }
+}
 /* Back to Top Button */
 .back-to-top {
   position: fixed;
