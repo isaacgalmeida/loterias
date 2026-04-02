@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "lastUpdate": "2026-04-01T07:13:09.756Z",
-    "totalDraws": 3650,
+    "lastUpdate": "2026-04-02T07:05:23.044Z",
+    "totalDraws": 3651,
     "lotteryType": "lotofacil",
     "version": "1.0",
     "syncSource": "local-script"
@@ -87606,6 +87606,30 @@
       "acumulado": false,
       "valorEstimadoProximoConcurso": 2000000,
       "dataProximoConcurso": "01/04/2026"
+    },
+    {
+      "concurso": 3651,
+      "data": "01/04/2026",
+      "numeros": [
+        2,
+        3,
+        5,
+        8,
+        10,
+        12,
+        13,
+        14,
+        16,
+        17,
+        18,
+        20,
+        21,
+        24,
+        25
+      ],
+      "acumulado": false,
+      "valorEstimadoProximoConcurso": 2000000,
+      "dataProximoConcurso": "02/04/2026"
     }
   ]
 }
