@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "lastUpdate": "2026-05-07T08:26:00.360Z",
-    "totalDraws": 3004,
+    "lastUpdate": "2026-05-08T07:21:57.584Z",
+    "totalDraws": 3005,
     "lotteryType": "megasena",
     "version": "1.0",
     "syncSource": "local-script"
@@ -45066,6 +45066,21 @@
       "acumulado": true,
       "valorEstimadoProximoConcurso": 36000000,
       "dataProximoConcurso": "07/05/2026"
+    },
+    {
+      "concurso": 3005,
+      "data": "07/05/2026",
+      "numeros": [
+        17,
+        23,
+        29,
+        30,
+        48,
+        50
+      ],
+      "acumulado": true,
+      "valorEstimadoProximoConcurso": 45000000,
+      "dataProximoConcurso": "09/05/2026"
     }
   ]
 }
