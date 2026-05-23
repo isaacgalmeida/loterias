@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "lastUpdate": "2026-05-22T08:53:16.186Z",
-    "totalDraws": 3691,
+    "lastUpdate": "2026-05-23T08:10:37.975Z",
+    "totalDraws": 3692,
     "lotteryType": "lotofacil",
     "version": "1.0",
     "syncSource": "local-script"
@@ -88590,6 +88590,30 @@
       "acumulado": false,
       "valorEstimadoProximoConcurso": 2000000,
       "dataProximoConcurso": "22/05/2026"
+    },
+    {
+      "concurso": 3692,
+      "data": "22/05/2026",
+      "numeros": [
+        2,
+        3,
+        5,
+        6,
+        7,
+        9,
+        10,
+        13,
+        14,
+        15,
+        19,
+        20,
+        23,
+        24,
+        25
+      ],
+      "acumulado": false,
+      "valorEstimadoProximoConcurso": 2000000,
+      "dataProximoConcurso": "23/05/2026"
     }
   ]
 }
