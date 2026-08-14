@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "lastUpdate": "2026-08-13T07:17:27.209Z",
-    "totalDraws": 3760,
+    "lastUpdate": "2026-08-14T07:15:15.531Z",
+    "totalDraws": 3761,
     "lotteryType": "lotofacil",
     "version": "1.0",
     "syncSource": "local-script"
@@ -90246,6 +90246,30 @@
       "acumulado": false,
       "valorEstimadoProximoConcurso": 2000000,
       "dataProximoConcurso": "13/08/2026"
+    },
+    {
+      "concurso": 3761,
+      "data": "13/08/2026",
+      "numeros": [
+        1,
+        3,
+        6,
+        9,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        21,
+        23,
+        24,
+        25
+      ],
+      "acumulado": true,
+      "valorEstimadoProximoConcurso": 5000000,
+      "dataProximoConcurso": "14/08/2026"
     }
   ]
 }
