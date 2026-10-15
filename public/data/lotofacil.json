@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "lastUpdate": "2026-10-14T11:00:18.218Z",
-    "totalDraws": 3803,
+    "lastUpdate": "2026-10-15T10:43:07.430Z",
+    "totalDraws": 3804,
     "lotteryType": "lotofacil",
     "version": "1.0",
     "syncSource": "local-script"
@@ -91278,6 +91278,30 @@
       "acumulado": false,
       "valorEstimadoProximoConcurso": 2000000,
       "dataProximoConcurso": "14/10/2026"
+    },
+    {
+      "concurso": 3804,
+      "data": "14/10/2026",
+      "numeros": [
+        1,
+        2,
+        6,
+        7,
+        8,
+        12,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        21,
+        24,
+        25
+      ],
+      "acumulado": true,
+      "valorEstimadoProximoConcurso": 5000000,
+      "dataProximoConcurso": "15/10/2026"
     }
   ]
 }
